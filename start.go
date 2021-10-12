@@ -9,6 +9,7 @@ import (
 	"oaf-server/geopackage"
 	"oaf-server/postgis"
 	"oaf-server/server"
+	"oaf-server/package"
 	"os"
 	"regexp"
 
@@ -84,6 +85,9 @@ func main() {
 		// extra routing for healthcheck
 		addHealthHandler(router)
 
+		// extra routing for package calls
+		addPackageHandler(router)
+
 		fs := http.FileServer(http.Dir("swagger-ui"))
 		router.Handler(regexp.MustCompile("/swagger-ui"), http.StripPrefix("/swagger-ui/", fs))
 
@@ -130,4 +134,10 @@ func addHealthHandler(router *server.RegexpHandler) {
 			log.Printf("Could not write ok")
 		}
 	})
+}
+
+func addPackageHandler(router *server.RegexpHandler) {
+	mountingPath := "/package"
+	engine := apif.NewSimpleEngine(mountingPath)
+	router.HandleFunc(regexp.MustCompile("^" + mountingPath), engine.HTTPHandler)
 }
