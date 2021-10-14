@@ -9,14 +9,17 @@ import(
 type Router interface {
   // Handler for requests
   HandleRequest(w http.ResponseWriter, request *http.Request)
+
+  GetRoute(page string)
 }
 
 type router struct {
-  routes []*route
+  routes map[string]*route
   mountingPath string
 }
 
-type route struct {
+type Route struct {
+  Page string
   MatchUrl string
   Pattern *regexp.Regexp
   Handler ControllerFunc
@@ -60,12 +63,14 @@ func (router *router) HandleRequest(w http.ResponseWriter, request *http.Request
 // Adds a new route to the router.
 //
 // Variables must be named :variable_name, eg: /collections/:collection_id
-func (r *router) AddRoute(matchUrl string, handler ControllerFunc) {
+func (r *router) AddRoute(page string, matchUrl string, handler ControllerFunc) {
   pattern := regexp.MustCompile("^" + matchUrl + "$")
-  newRoute := &route{
+  newRoute := &Route{
+    Page: page,
     MatchUrl: matchUrl,
     Pattern: pattern,
     Handler: handler,
   }
-  r.routes = append(r.routes, newRoute)
+
+  r.routes[page] = newRoute
 }

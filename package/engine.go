@@ -4,6 +4,7 @@ import(
   "net/http"
   "strings"
   "oaf-server/package/controllers"
+  "oaf-server/package/models"
 )
 
 // A controller for resolving the OGC Api Feature calls
@@ -11,8 +12,21 @@ import(
 // The controller contains all the elements required
 // for handling OGC Api Features calls.
 type Engine interface {
+  // HTTP functions
+
   HTTPHandler(http.ResponseWriter, *http.Request)
   Mount(mountingPath string)
+
+  // Template functions
+
+  AddConformanceTemplate(title, contentType, WFSConformanceTemplater)
+
+  // Service functions
+  Title() string
+  Description() string
+  SetTitle(title string)
+  SetDescription(description string)
+  Templates() []models.Template
 }
 
 type engine struct {
@@ -21,7 +35,20 @@ type engine struct {
   // Example:
   mountingPath string
 
+  // router
   router Router
+
+  // landingpage controller
+  landingpageController apifcontrollers.LandingpageController
+
+  //conformance controller
+  conformanceController apifcontrollers.ConformanceController
+
+  // conformance templates
+  conformanceTemplates map[string]templates.RenderConformanceFunc
+
+  title string
+  description string
 }
 
 // Function signature of the callbacks from the router
@@ -33,6 +60,7 @@ type ControllerFunc func(w http.ResponseWriter, r *http.Request)
 func NewEngine(router Router) *engine {
   engine := &engine{
     router: router,
+    conformanceTemplates: make*map[string]templates.RenderConformanceFunc,
   }
   return engine
 }
@@ -41,11 +69,12 @@ func NewSimpleEngine(mountingPath string) *engine {
   router := NewRouter(mountingPath)
   engine := NewEngine(router)
 
-  controller := apifcontrollers.LandingPage{}
-  router.AddRoute("", controller.Handle)
-  router.AddRoute("/", controller.Handle)
-  router.AddRoute("/conformance", controller.Handle)
-  router.AddRoute("/collections", controller.Handle)
+  engine.landingpageController := apifcontrollers.LandingPage{}
+  router.AddRoute("", "/?", landingpageController.Handle)
+
+  engine.conformanceController := apifcontrollers.ConformanceController{}
+  router.AddRoute("conformance", "/conformance", conformanceController.Handle)
+
 
   return engine
 }
@@ -62,6 +91,19 @@ func (c *engine) Mount(mountingPath string) {
   mountingPath = sanitizeMountingPath(mountingPath)
   c.mountingPath = mountingPath
 }
+
+func (e *engine) Title() { return e.title }
+func (e *engine) Description() { return e.description }
+func (e *engine) SetTitle(title string) { e.title = title }
+func (e *engine) SetDescription(description string) { e.description = description }
+
+func (e *engine) Templates(url string, contenttype string) []models.Template {
+
+}
+
+//
+// Utility functions
+//
 
 func sanitizeMountingPath(mountingPath string) string {
   if(!strings.HasPrefix(mountingPath, "/")) {

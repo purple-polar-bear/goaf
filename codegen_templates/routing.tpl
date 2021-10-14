@@ -54,7 +54,7 @@ func (s *Server) Router() *RegexpHandler {
 	router := &RegexpHandler{}
 	router.HandleFunc(regexp.MustCompile("/api"), s.HandleForProvider(s.Providers.NewGetApiProvider))
     {{range $key, $value := .Paths}}// path: {{$key}}
-    router.HandleFunc(regexp.MustCompile("{{pathparams $key}}"), s.HandleForProvider(s.Providers.New{{upperFirst .Get.OperationID}}Provider))
+    router.HandleFunc(regexp.MustCompile("^{{pathparams $key}}"), s.HandleForProvider(s.Providers.New{{upperFirst .Get.OperationID}}Provider))
 	{{end -}}
     return router
 }
