@@ -1,9 +1,17 @@
 package apifcontrollers
 
+import(
+  "net/http"
+
+  "oaf-server/package/models"
+  "oaf-server/package/templates/core"
+)
+
 // The conformance controller returns the conformance classes of the API
 // TODO: build this list - at least partly - automatically, based on
 // configuration
 type ConformanceController interface {
+  BaseController
   ConformanceClasses() []string
 }
 
@@ -24,5 +32,14 @@ func (controller *conformanceController) ConformanceClasses() []string {
   }
 }
 
-func (controller *conformanceController) Handle(context templates.Context, render templates.RenderConformanceFunc) {
+
+func (controller *conformanceController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
+  renderer := r.(coretemplates.RenderConformanceType)
+  return func(w http.ResponseWriter, r *http.Request) {
+    resource := &models.Conformanceclasses{
+      ConformsTo: controller.ConformanceClasses(),
+    }
+
+    renderer.RenderConformance(models.NewWebcontext(w, r), resource)
+  }
 }

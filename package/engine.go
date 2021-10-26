@@ -18,15 +18,17 @@ type Engine interface {
   Mount(mountingPath string)
 
   // Template functions
+  Controller(name string) apifcontrollers.BaseController
 
-  AddConformanceTemplate(title, contentType, WFSConformanceTemplater)
+  // AddConformanceTemplate(title string, contentType string, renderer coretemplates.RenderConformanceType)
+  AddTemplate(name string, title string, contenttype string, renderer interface{})
+  Templates(string, string) []*models.Typeroute
 
   // Service functions
   Title() string
   Description() string
   SetTitle(title string)
   SetDescription(description string)
-  Templates() []models.Template
 }
 
 type engine struct {
@@ -38,21 +40,15 @@ type engine struct {
   // router
   router Router
 
-  // landingpage controller
-  landingpageController apifcontrollers.LandingpageController
-
-  //conformance controller
-  conformanceController apifcontrollers.ConformanceController
-
-  // conformance templates
-  conformanceTemplates map[string]templates.RenderConformanceFunc
+  // list of controllers
+  // path: routename -> controller
+  // controllers map[string]apifcontrollers.BaseController
+  // list render functions
+  // path: routename -> content type -> controller handler function with renderer
 
   title string
   description string
 }
-
-// Function signature of the callbacks from the router
-type ControllerFunc func(w http.ResponseWriter, r *http.Request)
 
 // Returns a new controller for handling OGC Api Feature calls.
 //
@@ -60,7 +56,6 @@ type ControllerFunc func(w http.ResponseWriter, r *http.Request)
 func NewEngine(router Router) *engine {
   engine := &engine{
     router: router,
-    conformanceTemplates: make*map[string]templates.RenderConformanceFunc,
   }
   return engine
 }
@@ -69,15 +64,28 @@ func NewSimpleEngine(mountingPath string) *engine {
   router := NewRouter(mountingPath)
   engine := NewEngine(router)
 
-  engine.landingpageController := apifcontrollers.LandingPage{}
-  router.AddRoute("", "/?", landingpageController.Handle)
+  landingpageController := &apifcontrollers.LandingpageController{}
+  engine.AddRoute("", "/?", landingpageController)
 
-  engine.conformanceController := apifcontrollers.ConformanceController{}
-  router.AddRoute("conformance", "/conformance", conformanceController.Handle)
-
+  conformanceController := apifcontrollers.NewConformanceController()
+  engine.AddRoute("conformance", "/conformance", conformanceController)
 
   return engine
 }
+
+func EnableFeatures(engine *engine) {
+  engine.AddConformanceClass("http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/features")
+  collectionsController := &apifcontrollers.CollectionsController{}
+  engine.AddRoute("collections", "/collection", collectionsController)
+}
+
+/*
+func EnableTiles(engine *engine) {
+  engine.AddConformanceClass("http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/tiles")
+  engine.tilesomethingController = apifcontrollers.TilesomethingController{}
+  router.AddRoute("tiles", "/tiles", engine.tilesomethingController)
+}
+*/
 
 func (c *engine) HTTPHandler(w http.ResponseWriter, r *http.Request) {
   if (c.router == nil) {
@@ -87,18 +95,29 @@ func (c *engine) HTTPHandler(w http.ResponseWriter, r *http.Request) {
   c.router.HandleRequest(w, r)
 }
 
+func (e *engine) AddRoute(routename string, path string, controller apifcontrollers.BaseController) {
+  e.router.AddRoute(routename, path, controller)
+}
+
 func (c *engine) Mount(mountingPath string) {
   mountingPath = sanitizeMountingPath(mountingPath)
   c.mountingPath = mountingPath
 }
 
-func (e *engine) Title() { return e.title }
-func (e *engine) Description() { return e.description }
+func (e *engine) Title() string { return e.title }
+func (e *engine) Description() string { return e.description }
 func (e *engine) SetTitle(title string) { e.title = title }
 func (e *engine) SetDescription(description string) { e.description = description }
+func (e *engine) Templates(url string, contenttype string) []*models.Typeroute {
+  return []*models.Typeroute{}
+}
 
-func (e *engine) Templates(url string, contenttype string) []models.Template {
+func (e *engine) Controller(name string) apifcontrollers.BaseController {
+  return e.router.Controller(name)
+}
 
+func (e *engine) AddConformanceClass(conformanceclass string) {
+  // TODO: add conformance classes
 }
 
 //

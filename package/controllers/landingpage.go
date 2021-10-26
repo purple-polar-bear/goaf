@@ -3,28 +3,32 @@ package apifcontrollers
 import(
   "net/http"
   "oaf-server/package/models"
-  "oaf-server/package/templates"
+  "oaf-server/package/templates/core"
 )
 
-type LandingPageController struct {
+type LandingpageController struct {
 }
 
-func (controller *LandingPage) Handle(w http.ResponseWriter, r *http.Request, app models.Engine) *models.Landingpage{
-  links := controller.buildLinks(app)
+func (controller *LandingpageController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
+  renderer := r.(coretemplates.RenderLandingpageType)
 
-  resource := &models.Landingpage{
-    Title: app.Title(),
-    Description: app.Description(),
-    Links: links,
+  return func(w http.ResponseWriter, r *http.Request) {
+    links := controller.buildLinks(app)
+
+    resource := &models.Landingpage{
+      Title: app.Title(),
+      Description: app.Description(),
+      Links: links,
+    }
+
+    renderer.RenderLandingpage(nil, resource)
   }
-
-  return resource
 }
 
-func (controller *LandingPage) buildLinks(app models.Engine) []models.Link {
-  result := []models.Link
-  for _, item := app.Templates() {
-    rel := determineRelation()
+func (controller *LandingpageController) buildLinks(app models.Application) []*models.Link {
+  result := []*models.Link{}
+  for _, item := range app.Templates("", "") {
+    rel := item.CalculateRelation()
     if rel == "" {
       continue
     }

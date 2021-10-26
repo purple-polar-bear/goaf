@@ -1,5 +1,9 @@
 package jsontemplates
 
-func RenderConformance(context template.Context, conformanceClasses models.conformanceclasses) {
+import(
+  "oaf-server/package/models"
+)
+
+func RenderConformance(context *models.Webcontext, conformanceClasses *models.Conformanceclasses) {
   RenderPage(context, conformanceClasses)
 }

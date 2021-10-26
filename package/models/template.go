@@ -4,6 +4,14 @@ package models
 type Typeroute struct {
   Rel string
   Title string
-  Type string  
-  Href string
+  Type string
+  RelativeHref string
+}
+
+func (tr *Typeroute) Href() string {
+  return tr.RelativeHref;
+}
+
+func (tr *Typeroute) CalculateRelation() string {
+  return ""  
 }
