@@ -1,4 +1,4 @@
-package models
+package viewmodels
 
 type Link struct {
   Href string `json:"href"`

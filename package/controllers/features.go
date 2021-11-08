@@ -6,11 +6,11 @@ import(
   "oaf-server/package/models"
 )
 
-type ItemController struct {
+type FeaturesController struct {
 
 }
 
-func (controller *ItemController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
+func (controller *FeaturesController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
   return func(w http.ResponseWriter, r *http.Request) {
   }
 }

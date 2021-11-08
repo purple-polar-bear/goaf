@@ -1,6 +1,6 @@
 package models
 
 type Exception struct {
-  Code string
-  Description string
+  Code string `json:"code"`
+	Description string `json:"description,omitempty"`
 }

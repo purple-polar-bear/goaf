@@ -5,14 +5,16 @@ import(
 )
 
 type Application interface {
-  // Name of the server instance
-  Title() string
+  // Configuration of the server
+  Config() Serverconfig
 
-  // Description of the server instance
-  Description() string
+  // List of routes
+  Routes() []Route
 
   // List of view templates
-  Templates(string, string) []*Typeroute
+  Templates(string, string) []Handler
+
+  GetService(string) interface{}
 }
 
 // Function signature of the callbacks from the router

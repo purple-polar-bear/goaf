@@ -10,6 +10,7 @@ import (
 	"oaf-server/postgis"
 	"oaf-server/server"
 	"oaf-server/package"
+	"oaf-server/package/features"
 	"os"
 	"regexp"
 
@@ -136,8 +137,64 @@ func addHealthHandler(router *server.RegexpHandler) {
 	})
 }
 
+//
+// Featureservice
+//
+
+type featureService struct {
+
+}
+
+func NewFeatureService() features.FeatureService {
+  return &featureService{
+  }
+}
+
+func (service *featureService) Collections() []features.Collection {
+	return []features.Collection{
+		service.Collection("addresses"),
+	}
+}
+
+func (service *featureService) Collection(name string) features.Collection {
+	switch name {
+	case "addresses":
+		return &collection{
+			id: "addresses",
+			title: "addresses",
+			description: "INSPIRE Alternative Encoding Addresses",
+		}
+	}
+
+	return nil
+}
+
+type collection struct {
+	id string
+	title string
+	description string
+}
+
+func (c *collection) Id() string { return c.id }
+func (c *collection) Title() string { return c.title }
+func (c *collection) Description() string { return c.description }
+
+//
+// End of featureservice
+//
+
 func addPackageHandler(router *server.RegexpHandler) {
 	mountingPath := "/package"
 	engine := apif.NewSimpleEngine(mountingPath)
+	apif.AddBaseJSONTemplates(engine)
+
+	config := engine.Config()
+	config.SetTitle("goaf Demo instance - running latest GitHub version")
+	config.SetDescription("goaf provides an API to geospatial data")
+
+	service := NewFeatureService()
+	apif.EnableFeatures(engine, service)
+	apif.AddFeaturesJSONTemplates(engine)
+
 	router.HandleFunc(regexp.MustCompile("^" + mountingPath), engine.HTTPHandler)
 }

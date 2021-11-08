@@ -1,4 +1,4 @@
-package models
+package viewmodels
 
 type Landingpage struct {
   Title string `json:"title"`

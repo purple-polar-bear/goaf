@@ -4,6 +4,7 @@ import(
   "net/http"
   "strings"
   "oaf-server/package/controllers"
+  "oaf-server/package/features"
   "oaf-server/package/models"
 )
 
@@ -18,25 +19,27 @@ type Engine interface {
   Mount(mountingPath string)
 
   // Template functions
-  Controller(name string) apifcontrollers.BaseController
+  Controller(name string) models.BaseController
 
   // AddConformanceTemplate(title string, contentType string, renderer coretemplates.RenderConformanceType)
-  AddTemplate(name string, title string, contenttype string, renderer interface{})
-  Templates(string, string) []*models.Typeroute
+  AddTemplate(name string, title string, contenttype string, rel string, renderer interface{})
+  Templates(string, string) []models.Handler
 
-  // Service functions
-  Title() string
-  Description() string
-  SetTitle(title string)
-  SetDescription(description string)
+  // Server configuration
+  Config() models.Serverconfig
+
+  // Router
+  Router() Router
+  SetRouter(router Router)
+
+  // Adds a service
+  AddService(string, interface{})
+
+  // Returns a service
+  GetService(string) interface{}
 }
 
 type engine struct {
-  // Mounting path is the path where the controller is mounted.
-  //
-  // Example:
-  mountingPath string
-
   // router
   router Router
 
@@ -46,37 +49,87 @@ type engine struct {
   // list render functions
   // path: routename -> content type -> controller handler function with renderer
 
-  title string
-  description string
+  serverconfig models.Serverconfig
+
+  services map[string]interface{}
 }
 
 // Returns a new controller for handling OGC Api Feature calls.
 //
 // This method does not require any furhter configuration
-func NewEngine(router Router) *engine {
+func NewEngine() *engine {
+  config := models.NewServerConfig()
   engine := &engine{
-    router: router,
+    router: NewRouter(config),
+    serverconfig: config,
+    services: make(map[string]interface{}),
   }
+
   return engine
 }
 
-func NewSimpleEngine(mountingPath string) *engine {
-  router := NewRouter(mountingPath)
-  engine := NewEngine(router)
+func (e *engine) Router() Router {
+  return e.router
+}
+
+func (e *engine) SetRouter(router Router) {
+  e.router = router
+}
+
+func NewSimpleEngine(mountingpath string) *engine {
+  engine := NewEngine()
+
+  engine.Config().SetMountingpath(mountingpath)
 
   landingpageController := &apifcontrollers.LandingpageController{}
-  engine.AddRoute("", "/?", landingpageController)
+  engine.AddRoute(&Routedef{
+    Name: "landingpage",
+    Path: "/?",
+    Controller: landingpageController,
+    LandingpageVisible: true,
+  })
 
   conformanceController := apifcontrollers.NewConformanceController()
-  engine.AddRoute("conformance", "/conformance", conformanceController)
+  engine.AddRoute(&Routedef{
+    Name: "conformance",
+    Path: "/conformance",
+    Controller: conformanceController,
+    LandingpageVisible: true,
+  })
 
   return engine
 }
 
-func EnableFeatures(engine *engine) {
+func EnableFeatures(engine *engine, service features.FeatureService) {
   engine.AddConformanceClass("http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/features")
+
   collectionsController := &apifcontrollers.CollectionsController{}
-  engine.AddRoute("collections", "/collection", collectionsController)
+  engine.AddRoute(&Routedef{
+    Name: "featurecollections",
+    Path: "/collections",
+    Controller: collectionsController,
+    LandingpageVisible: true,
+  })
+  collectionController := &apifcontrollers.CollectionController{}
+  engine.AddRoute(&Routedef{
+    Name: "featurecollection",
+    Path: "/collections/:collection_id",
+    Controller: collectionController,
+  })
+  featuresController := &apifcontrollers.FeaturesController{}
+  engine.AddRoute(&Routedef{
+    Name: "features",
+    Path: "/collections/:collection_id/items",
+    Controller: featuresController,
+  })
+  featureController := &apifcontrollers.FeatureController{}
+  engine.AddRoute(&Routedef{
+    Name: "feature",
+    Path: "/collections/:collection_id/items/:item_id",
+    Controller: featureController,
+  })
+
+  engine.AddService("features", service)
 }
 
 /*
@@ -95,29 +148,52 @@ func (c *engine) HTTPHandler(w http.ResponseWriter, r *http.Request) {
   c.router.HandleRequest(w, r)
 }
 
-func (e *engine) AddRoute(routename string, path string, controller apifcontrollers.BaseController) {
-  e.router.AddRoute(routename, path, controller)
+func (e *engine) AddRoute(routedefinition *Routedef) {
+  e.router.AddRoute(routedefinition)
 }
 
-func (c *engine) Mount(mountingPath string) {
-  mountingPath = sanitizeMountingPath(mountingPath)
-  c.mountingPath = mountingPath
+func (c *engine) Mount(mountingpath string) {
+  mountingpath = sanitizeMountingPath(mountingpath)
+  c.Config().SetMountingpath(mountingpath)
 }
 
-func (e *engine) Title() string { return e.title }
-func (e *engine) Description() string { return e.description }
-func (e *engine) SetTitle(title string) { e.title = title }
-func (e *engine) SetDescription(description string) { e.description = description }
-func (e *engine) Templates(url string, contenttype string) []*models.Typeroute {
-  return []*models.Typeroute{}
+func (e *engine) Config() models.Serverconfig {
+  return e.serverconfig
 }
 
-func (e *engine) Controller(name string) apifcontrollers.BaseController {
+func (e *engine) Templates(url string, contenttype string) []models.Handler {
+  result := []models.Handler{}
+  for _, handler := range e.router.Handlers() {
+    if url != "" {
+      if url != handler.route.name {
+        continue
+      }
+    }
+
+    result = append(result, handler)
+  }
+
+  return result
+}
+
+func (e *engine) Controller(name string) models.BaseController {
   return e.router.Controller(name)
 }
 
 func (e *engine) AddConformanceClass(conformanceclass string) {
   // TODO: add conformance classes
+}
+
+func (e *engine) AddService(name string, service interface{}) {
+  e.services[name] = service
+}
+
+func (e *engine) GetService(name string) interface{} {
+  return e.services[name]
+}
+
+func (e *engine) Routes() []models.Route {
+  return e.router.Routes()
 }
 
 //
