@@ -9,6 +9,6 @@ import(
 type RenderFeaturesType interface {
   RenderCollections(context *models.Webcontext, collections *viewmodels.Collections)
   RenderCollection(context *models.Webcontext, collection *viewmodels.Collection)
-  RenderItems(context *models.Webcontext, items *viewmodels.Items)
-  RenderItem(context *models.Webcontext, item *viewmodels.Item)
+  RenderItems(context *models.Webcontext, items *viewmodels.Features)
+  RenderItem(context *models.Webcontext, item *viewmodels.Feature)
 }

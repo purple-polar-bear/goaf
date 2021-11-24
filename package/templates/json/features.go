@@ -21,10 +21,10 @@ func (renderer *FeatureRenderer) RenderCollection(context *models.Webcontext, co
   RenderPage(context, collection)
 }
 
-func (renderer *FeatureRenderer) RenderItems(context *models.Webcontext, items *viewmodels.Items) {
+func (renderer *FeatureRenderer) RenderItems(context *models.Webcontext, items *viewmodels.Features) {
   RenderPage(context, items)
 }
 
-func (renderer *FeatureRenderer) RenderItem(context *models.Webcontext, item *viewmodels.Item) {
+func (renderer *FeatureRenderer) RenderItem(context *models.Webcontext, item *viewmodels.Feature) {
   RenderPage(context, item)
 }

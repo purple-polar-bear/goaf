@@ -108,20 +108,39 @@ func (router *router) HandleRequest(w http.ResponseWriter, r *http.Request) {
   // constructing relative path
   mountingPathLength := len(mountingpath)
   path := absolutePath[mountingPathLength:]
+  pathParts := strings.Split(path, "/")
+  pathPartsLen := len(pathParts)
 
   // try to match the path
   for _, route := range router.routes {
-    if route.Pattern.MatchString(path) {
-      contenttype := "application/json"
-      handler := route.handlers[contenttype]
-      if handler == nil {
-        http.NotFound(w, r)
-        return
-      }
+    if len(route.UrlParts) != pathPartsLen {
+      continue
+    }
 
-      handler.controllerFunc(w, r)
+    match := true
+    params := make(map[string]string)
+    for index, part := range route.UrlParts {
+      if part.IsVariable {
+        params[part.Name] = pathParts[index]
+      } else {
+        if part.Name != pathParts[index] {
+          match = false
+        }
+      }
+    }
+    if !match {
+      continue
+    }
+
+    contenttype := "application/json"
+    handler := route.handlers[contenttype]
+    if handler == nil {
+      http.NotFound(w, r)
       return
     }
+
+    handler.controllerFunc(w, r)
+    return
   }
 
   // end of router
@@ -156,6 +175,7 @@ func (r *router) AddRoute(routedefinition *Routedef) {
   newRoute := &Route{
     name: name,
     MatchUrl: matchUrl,
+    UrlParts: BuildUrlParts(matchUrl),
     landingpageVisible: routedefinition.LandingpageVisible,
     Pattern: pattern,
     Controller: routedefinition.Controller,

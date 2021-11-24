@@ -14,6 +14,8 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/go-spatial/geom"
+	"github.com/go-spatial/geom/encoding/geojson"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/urfave/cli/v2"
 
@@ -167,6 +169,28 @@ func (service *featureService) Collection(name string) features.Collection {
 	}
 
 	return nil
+}
+
+func (service *featureService) Features(params *features.FeaturesParams) features.Features {
+	items := []*features.Feature{
+		service.Feature(1),
+	}
+
+	return features.NewSimpleFeatures(params, items)
+}
+
+func (service *featureService) Feature(id int) *features.Feature {
+	geometry := geom.Point{4.873270473933632, 53.083485031473046}
+	properties := make(map[string]interface{})
+	properties["component_addressareaname"] = "Oosterend"
+
+	return &features.Feature{
+		ID: 1,
+		Feature: geojson.Feature{
+			Geometry: geojson.Geometry{Geometry: geometry},
+			Properties: properties,
+		},
+	}
 }
 
 type collection struct {
