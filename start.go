@@ -7,15 +7,12 @@ import (
 	"oaf-server/codegen"
 	"oaf-server/core"
 	"oaf-server/geopackage"
+	apif "oaf-server/package"
 	"oaf-server/postgis"
 	"oaf-server/server"
-	"oaf-server/package"
-	"oaf-server/package/features"
 	"os"
 	"regexp"
 
-	"github.com/go-spatial/geom"
-	"github.com/go-spatial/geom/encoding/geojson"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/urfave/cli/v2"
 
@@ -89,7 +86,7 @@ func main() {
 		addHealthHandler(router)
 
 		// extra routing for package calls
-		addPackageHandler(router)
+		addPackageHandler(router, config)
 
 		fs := http.FileServer(http.Dir("swagger-ui"))
 		router.Handler(regexp.MustCompile("/swagger-ui"), http.StripPrefix("/swagger-ui/", fs))
@@ -140,74 +137,10 @@ func addHealthHandler(router *server.RegexpHandler) {
 }
 
 //
-// Featureservice
-//
-
-type featureService struct {
-
-}
-
-func NewFeatureService() features.FeatureService {
-  return &featureService{
-  }
-}
-
-func (service *featureService) Collections() []features.Collection {
-	return []features.Collection{
-		service.Collection("addresses"),
-	}
-}
-
-func (service *featureService) Collection(name string) features.Collection {
-	switch name {
-	case "addresses":
-		return &collection{
-			id: "addresses",
-			title: "addresses",
-			description: "INSPIRE Alternative Encoding Addresses",
-		}
-	}
-
-	return nil
-}
-
-func (service *featureService) Features(params *features.FeaturesParams) features.Features {
-	items := []*features.Feature{
-		service.Feature(1),
-	}
-
-	return features.NewSimpleFeatures(params, items)
-}
-
-func (service *featureService) Feature(id int) *features.Feature {
-	geometry := geom.Point{4.873270473933632, 53.083485031473046}
-	properties := make(map[string]interface{})
-	properties["component_addressareaname"] = "Oosterend"
-
-	return &features.Feature{
-		ID: 1,
-		Feature: geojson.Feature{
-			Geometry: geojson.Geometry{Geometry: geometry},
-			Properties: properties,
-		},
-	}
-}
-
-type collection struct {
-	id string
-	title string
-	description string
-}
-
-func (c *collection) Id() string { return c.id }
-func (c *collection) Title() string { return c.title }
-func (c *collection) Description() string { return c.description }
-
-//
 // End of featureservice
 //
 
-func addPackageHandler(router *server.RegexpHandler) {
+func addPackageHandler(router *server.RegexpHandler, dsrc *core.Config) {
 	mountingPath := "/package"
 	engine := apif.NewSimpleEngine(mountingPath)
 	apif.AddBaseJSONTemplates(engine)
@@ -216,9 +149,9 @@ func addPackageHandler(router *server.RegexpHandler) {
 	config.SetTitle("goaf Demo instance - running latest GitHub version")
 	config.SetDescription("goaf provides an API to geospatial data")
 
-	service := NewFeatureService()
-	apif.EnableFeatures(engine, service)
+	featuredatasource := geopackage.Init(*dsrc)
+	apif.EnableFeatures(engine, featuredatasource)
 	apif.AddFeaturesJSONTemplates(engine)
 
-	router.HandleFunc(regexp.MustCompile("^" + mountingPath), engine.HTTPHandler)
+	router.HandleFunc(regexp.MustCompile("^"+mountingPath), engine.HTTPHandler)
 }

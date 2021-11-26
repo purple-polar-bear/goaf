@@ -5,12 +5,13 @@ import (
 	"net/http"
 	"oaf-server/codegen"
 	"oaf-server/core"
+	"oaf-server/package/features"
 )
 
 // GetFeatureProvider is returned by the NewGetFeatureProvider
 // containing the data, srsid and contenttype for the response
 type GetFeatureProvider struct {
-	data        *core.Feature
+	data        *features.Feature
 	srsid       string
 	contenttype string
 }

@@ -1,44 +1,49 @@
 package features
 
 type Features interface {
-  HasNext() bool
-  NextLimit() int
-  NextOffset() int
-  Items() []*Feature
+	HasNext() bool
+	NextLimit() int
+	NextOffset() int
+	Items() []*Feature
 }
 
 // Implementation
-type SimpleFeatures struct {
-  RequestParams *FeaturesParams
-  Next bool
-  Features []*Feature
+type FeatureCollection struct {
+	RequestParams  *FeaturesParams
+	Next           bool
+	Features       []*Feature
+	NumberReturned int64
+	Type           string
+	Links          []Link
+	NumberMatched  int64
+	Crs            string
 }
 
-func NewSimpleFeatures(params *FeaturesParams, features []*Feature) *SimpleFeatures {
-  next := (len(features) == params.Limit)
-  return &SimpleFeatures{
-    RequestParams: params,
-    Next: next,
-    Features: features,
-  }
+func NewFeatureCollection(params *FeaturesParams, features []*Feature) *FeatureCollection {
+	next := (len(features) == params.Limit)
+	return &FeatureCollection{
+		RequestParams: params,
+		Next:          next,
+		Features:      features,
+	}
 }
 
-func (features *SimpleFeatures) HasNext() bool {
-  return features.Next
+func (features *FeatureCollection) HasNext() bool {
+	return features.Next
 }
 
-func (features *SimpleFeatures) NextLimit() int {
-  if !features.HasNext() {
-    return 0
-  }
+func (features *FeatureCollection) NextLimit() int {
+	if !features.HasNext() {
+		return 0
+	}
 
-  return features.RequestParams.Limit
+	return features.RequestParams.Limit
 }
 
-func (features *SimpleFeatures) NextOffset() int {
-  return features.RequestParams.Offset + features.RequestParams.Limit
+func (features *FeatureCollection) NextOffset() int {
+	return features.RequestParams.Offset + features.RequestParams.Limit
 }
 
-func (features *SimpleFeatures) Items() []*Feature {
-  return features.Features
+func (features *FeatureCollection) Items() []*Feature {
+	return features.Features
 }

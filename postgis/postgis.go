@@ -19,7 +19,7 @@ type Postgis struct {
 	ApplicationId string
 	UserVersion   string
 	db            *sqlx.DB
-	Collections   []core.Collection
+	Collections   core.Collections
 	BBox          [4]float64
 	Srid          int64
 }
