@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"oaf-server/codegen"
+	"oaf-server/package/features"
 	"strconv"
 	"strings"
 
@@ -145,7 +146,7 @@ func GetRelationMap() map[string]string {
 	return ct
 }
 
-func ProcesLinksForParams(links []codegen.Link, queryParams url.Values) error {
+func ProcesLinksForParams(links []features.Link, queryParams url.Values) error {
 	for l := range links {
 		path, err := url.Parse(links[l].Href)
 		if err != nil {
@@ -167,15 +168,15 @@ func ProcesLinksForParams(links []codegen.Link, queryParams url.Values) error {
 
 }
 
-func CreateFeatureLinks(title, hrefPath, rel, ct string) ([]codegen.Link, error) {
+func CreateFeatureLinks(title, hrefPath, rel, ct string) ([]features.Link, error) {
 
-	links := make([]codegen.Link, 0)
+	links := make([]features.Link, 0)
 
 	href, err := ctLink(hrefPath, GetContentFieldMapByProviderType(DataProvider)[ct])
 	if err != nil {
 		return links, err
 	}
-	links = append(links, codegen.Link{Title: formatTitle(title, rel, GetContentFieldMapByProviderType(DataProvider)[ct]), Rel: rel, Href: href, Type: ct})
+	links = append(links, features.Link{Title: formatTitle(title, rel, GetContentFieldMapByProviderType(DataProvider)[ct]), Rel: rel, Href: href, Type: ct})
 
 	if rel == "self" {
 		rel = "alternate"
@@ -190,11 +191,11 @@ func CreateFeatureLinks(title, hrefPath, rel, ct string) ([]codegen.Link, error)
 			return links, err
 		}
 
-		links = append(links, codegen.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
+		links = append(links, features.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
 
 		if rel == "self" {
 			rel = "alternate"
-			links = append(links, codegen.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
+			links = append(links, features.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
 		}
 	}
 
@@ -361,7 +362,7 @@ func UpperFirst(title string) string {
 	return strings.Title(title)
 }
 
-func CreateProvidesSpecificParameters(api *openapi3.T, collections *[]Collection) *openapi3.T {
+func CreateProvidesSpecificParameters(api *openapi3.T, collections *Collections) *openapi3.T {
 
 	copy := &openapi3.T{
 		OpenAPI:      api.OpenAPI,
