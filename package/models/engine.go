@@ -18,4 +18,4 @@ type Application interface {
 }
 
 // Function signature of the callbacks from the router
-type ControllerFunc func(w http.ResponseWriter, r *http.Request)
+type ControllerFunc func(w http.ResponseWriter, r *http.Request, routeParameters MatchedRouteParameters)

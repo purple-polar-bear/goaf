@@ -16,7 +16,7 @@ type CollectionsController struct {
 func (controller *CollectionsController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
   renderer := r.(coretemplates.RenderFeaturesType)
 
-  return func(w http.ResponseWriter, r *http.Request) {
+  return func(w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
     // Given some provider
 
     collections := []*viewmodels.Collection{}

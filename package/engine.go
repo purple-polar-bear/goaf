@@ -84,7 +84,7 @@ func NewSimpleEngine(mountingpath string) *engine {
   landingpageController := &apifcontrollers.LandingpageController{}
   engine.AddRoute(&Routedef{
     Name: "landingpage",
-    Path: "/?",
+    Path: "",
     Controller: landingpageController,
     LandingpageVisible: true,
   })
@@ -92,7 +92,7 @@ func NewSimpleEngine(mountingpath string) *engine {
   conformanceController := apifcontrollers.NewConformanceController()
   engine.AddRoute(&Routedef{
     Name: "conformance",
-    Path: "/conformance",
+    Path: "conformance",
     Controller: conformanceController,
     LandingpageVisible: true,
   })
@@ -106,26 +106,26 @@ func EnableFeatures(engine *engine, service features.FeatureService) {
   collectionsController := &apifcontrollers.CollectionsController{}
   engine.AddRoute(&Routedef{
     Name: "featurecollections",
-    Path: "/collections",
+    Path: "collections",
     Controller: collectionsController,
     LandingpageVisible: true,
   })
   collectionController := &apifcontrollers.CollectionController{}
   engine.AddRoute(&Routedef{
     Name: "featurecollection",
-    Path: "/collections/:collection_id",
+    Path: "collections/:collection_id",
     Controller: collectionController,
   })
   featuresController := &apifcontrollers.FeaturesController{}
   engine.AddRoute(&Routedef{
     Name: "features",
-    Path: "/collections/:collection_id/items",
+    Path: "collections/:collection_id/items",
     Controller: featuresController,
   })
   featureController := &apifcontrollers.FeatureController{}
   engine.AddRoute(&Routedef{
     Name: "feature",
-    Path: "/collections/:collection_id/items/:item_id",
+    Path: "collections/:collection_id/items/:item_id",
     Controller: featureController,
   })
 

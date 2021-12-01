@@ -13,7 +13,7 @@ type LandingpageController struct {
 func (controller *LandingpageController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
   renderer := r.(coretemplates.RenderLandingpageType)
 
-  return func(w http.ResponseWriter, r *http.Request) {
+  return func(w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
     links := controller.buildLinks(app)
     config := app.Config()
 

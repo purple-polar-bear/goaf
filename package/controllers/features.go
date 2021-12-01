@@ -15,7 +15,7 @@ type FeaturesController struct {
 func (controller *FeaturesController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
   renderer := r.(coretemplates.RenderFeaturesType)
 
-  return func(w http.ResponseWriter, r *http.Request) {
+  return func(w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
     featuresRoute := app.Templates("features", "")
 
     featureService, ok := app.GetService("features").(features.FeatureService)
@@ -23,7 +23,7 @@ func (controller *FeaturesController) HandleFunc(app models.Application, r inter
       panic("Cannot find featureservice")
     }
 
-    featureParams := buildFeatureParams(app)
+    featureParams := buildFeatureParams(app, routeParameters)
     features := featureService.Features(r, featureParams)
     links := BuildFeaturesLinks(featuresRoute, featureParams, features)
 
@@ -41,8 +41,10 @@ func (controller *FeaturesController) HandleFunc(app models.Application, r inter
   }
 }
 
-func buildFeatureParams(app models.Application) *features.FeaturesParams {
-  return features.NewFeaturesParams()
+func buildFeatureParams(app models.Application, routeParameters models.MatchedRouteParameters) *features.FeaturesParams {
+  params := features.NewFeaturesParams()
+  params.CollectionId = routeParameters.Get("collection_id")
+  return params
 }
 
 func BuildFeaturesLinks(templates []models.Handler, params *features.FeaturesParams, items features.Features) []*viewmodels.Link {

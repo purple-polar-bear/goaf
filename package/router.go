@@ -84,6 +84,10 @@ type Routedef struct {
   LandingpageVisible  bool
 }
 
+type MatchedRoute struct {
+  Parameters map[string]string
+}
+
 // Initializes a new router object
 func NewRouter(serverconfig models.Serverconfig) *router {
 	router := &router{
@@ -110,6 +114,18 @@ func (router *router) HandleRequest(w http.ResponseWriter, r *http.Request) {
   path := absolutePath[mountingPathLength:]
   pathParts := strings.Split(path, "/")
   pathPartsLen := len(pathParts)
+  // remove empty trailing path
+  if pathParts[0] == "" {
+    pathParts = pathParts[1:]
+    pathPartsLen = len(pathParts)
+  }
+  // remove last empty path for landingpage
+  if pathPartsLen == 1 {
+    if pathParts[0] == "" {
+      pathParts = []string{}
+      pathPartsLen = 0
+    }
+  }
 
   // try to match the path
   for _, route := range router.routes {
@@ -118,10 +134,10 @@ func (router *router) HandleRequest(w http.ResponseWriter, r *http.Request) {
     }
 
     match := true
-    params := make(map[string]string)
+    routeParameters := NewMatchedRoute()
     for index, part := range route.UrlParts {
       if part.IsVariable {
-        params[part.Name] = pathParts[index]
+        routeParameters.Parameters[part.Name] = pathParts[index]
       } else {
         if part.Name != pathParts[index] {
           match = false
@@ -139,7 +155,7 @@ func (router *router) HandleRequest(w http.ResponseWriter, r *http.Request) {
       return
     }
 
-    handler.controllerFunc(w, r)
+    handler.controllerFunc(w, r, routeParameters)
     return
   }
 
@@ -227,7 +243,15 @@ func (r *router) Handlers() []*Handler {
 func BuildUrlParts(matchUrl string) []*UrlPart {
   result := []*UrlPart{}
   var newUrlPart *UrlPart
+  firstElement := true
   for _, element := range strings.Split(matchUrl, "/") {
+    if firstElement {
+      firstElement = false
+      if element == "" {
+        continue
+      }
+    }
+
     if strings.HasPrefix(element, ":") {
       newUrlPart = &UrlPart{
         Name: element[1:],
@@ -266,4 +290,15 @@ func (handler *Handler) Href(baseUrl string, params map[string]string) string {
     parsedUrl = strings.ReplaceAll(parsedUrl, ":" + key, value)
   }
   return baseUrl + parsedUrl
+}
+
+// Matched route
+func NewMatchedRoute() *MatchedRoute {
+  return &MatchedRoute{
+    Parameters: make(map[string]string),
+  }
+}
+
+func (route *MatchedRoute) Get(key string) string {
+  return route.Parameters[key]
 }

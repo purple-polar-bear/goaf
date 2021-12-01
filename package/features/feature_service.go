@@ -6,4 +6,5 @@ type FeatureService interface {
   Collections() []Collection
   Collection(string) Collection
   Features(*http.Request, *FeaturesParams) Features
+  Feature(string) Feature
 }

@@ -10,4 +10,13 @@ type Feature struct {
 	geojson.Feature
 	// Added Links in de document
 	Links []Link `json:"links,omitempty"`
+
+	Foo interface{}
+}
+
+func (c *Feature) MarshalJSON() ([]byte, error) {
+	nestedResult := c.MarshalJSON()
+	
+	return json.Marshal(map[string]interface{}{
+	}
 }

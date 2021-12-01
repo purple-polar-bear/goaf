@@ -9,3 +9,8 @@ type Route interface {
 
   LandingpageVisible()  bool
 }
+
+// Parameters of a matched route
+type MatchedRouteParameters interface {
+  Get(string) string
+}
