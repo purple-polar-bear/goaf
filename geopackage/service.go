@@ -89,12 +89,6 @@ func (service *featureService) Collection(name string) features.Collection {
 }
 
 func (service *featureService) Features(r *http.Request, params *features.FeaturesParams) features.Features {
-	// items := []*features.Feature{
-	// 	service.Feature(1),
-	// }
-
-	// return features.NewSimpleFeatures(params, items)
-
 	cn, err := service.config.Datasource.Collections.GetCollections(params.CollectionId)
 	if err != nil {
 		log.Fatal(err)
