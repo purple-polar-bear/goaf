@@ -1,22 +1,29 @@
 package viewmodels
 
 import (
-	"github.com/go-spatial/geom/encoding/geojson"
+	"encoding/json"
+//	"github.com/go-spatial/geom/encoding/geojson"
 )
 
 type Feature struct {
 	// overwrite ID in geojson.Feature so strings are also allowed as id
-	ID interface{} `json:"id,omitempty"`
-	geojson.Feature
+	Feature interface{}
 	// Added Links in de document
 	Links []Link `json:"links,omitempty"`
-
-	Foo interface{}
 }
 
 func (c *Feature) MarshalJSON() ([]byte, error) {
-	nestedResult := c.MarshalJSON()
-	
-	return json.Marshal(map[string]interface{}{
+	p, err := json.Marshal(c.Feature)
+	if err != nil {
+		return nil, err
 	}
+
+	var data map[string]interface{}
+	if err := json.Unmarshal(p, &data); err != nil {
+		return nil, err
+	}
+
+	data["Links"] = c.Links
+
+	return json.Marshal(data)
 }

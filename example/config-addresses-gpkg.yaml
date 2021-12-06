@@ -8,7 +8,7 @@ service:
   - api
   - oaf
   license: https://creativecommons.org/licenses/by/4.0/
-  licenseName: CC-BY 4.0 license 
+  licenseName: CC-BY 4.0 license
   provider:
     name: PDOK
     url: https://www.pdok.nl
@@ -36,7 +36,7 @@ datasource:
   collections:
   - identifier: addresses
     description: INSPIRE Alternative Encoding Addresses
-    links:     
+    links:
     - href: https://geodata.nationaalgeoregister.nl/inspireadressen/extract/inspireadressen.zip
       hreflang: nl
       length: 1911454553

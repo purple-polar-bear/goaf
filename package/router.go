@@ -289,7 +289,7 @@ func (handler *Handler) Href(baseUrl string, params map[string]string) string {
   for key, value := range params {
     parsedUrl = strings.ReplaceAll(parsedUrl, ":" + key, value)
   }
-  return baseUrl + parsedUrl
+  return baseUrl + "/" + parsedUrl
 }
 
 // Matched route

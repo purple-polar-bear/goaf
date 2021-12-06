@@ -5,7 +5,10 @@ import(
 
   "oaf-server/package/features"
   "oaf-server/package/models"
+  "oaf-server/package/viewmodels"
   "oaf-server/package/templates/core"
+
+  // "github.com/go-spatial/geom/encoding/geojson"
 )
 
 type FeatureController struct {
@@ -16,7 +19,7 @@ func (controller *FeatureController) HandleFunc(app models.Application, r interf
   renderer := r.(coretemplates.RenderFeaturesType)
 
   return func(w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
-    featuresRoute := app.Templates("features", "")
+    // featuresRoute := app.Templates("features", "")
 
     featureService, ok := app.GetService("features").(features.FeatureService)
     if !ok {
@@ -24,7 +27,11 @@ func (controller *FeatureController) HandleFunc(app models.Application, r interf
     }
 
     id := routeParameters.Get("item_id")
-    resource := featureService.Feature(id)
+    feature := featureService.Feature(id)
+    resource := &viewmodels.Feature{
+      Feature: feature,
+      Links: []viewmodels.Link{},
+    }
     renderer.RenderItem(models.NewWebcontext(w, r), resource)
   }
 }

@@ -99,7 +99,7 @@ func (service *featureService) Features(r *http.Request, params *features.Featur
 	limitParam := uint64(params.Limit)
 	bboxParam := params.Bbox
 
-	fcGeoJSON, err := service.geopackage.GetFeatures(r.Context(), service.geopackage.DB, cn, collectionId, offsetParam, limitParam, nil, bboxParam)
+	fcGeoJSON, err := service.geopackage.GetFeatures(r.Context(), service.geopackage.DB, cn, params, collectionId, offsetParam, limitParam, nil, bboxParam)
 	if err != nil {
 		log.Fatal("FeatureColletion error: ", err)
 	}
@@ -107,13 +107,13 @@ func (service *featureService) Features(r *http.Request, params *features.Featur
 	return fcGeoJSON
 }
 
-func (service *featureService) Feature(id int) *features.Feature {
+func (service *featureService) Feature(id string) *features.Feature {
 	geometry := geom.Point{4.873270473933632, 53.083485031473046}
 	properties := make(map[string]interface{})
 	properties["component_addressareaname"] = "Oosterend"
 
 	return &features.Feature{
-		ID: 1,
+		ID: id,
 		Feature: geojson.Feature{
 			Geometry:   geojson.Geometry{Geometry: geometry},
 			Properties: properties,

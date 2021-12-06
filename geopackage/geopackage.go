@@ -164,9 +164,11 @@ func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result
 }
 
 // GetFeatures return the FeatureCollection
-func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection core.Collection, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *features.FeatureCollection, err error) {
+func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection core.Collection, featureParams *features.FeaturesParams, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *features.FeatureCollection, err error) {
 	// Features bit of a hack // layer.Features => tablename, PK, ...FEATURES, assuming create table in sql statement first is PK
-	result = &features.FeatureCollection{}
+	result = &features.FeatureCollection{
+		RequestParams: featureParams,
+	}
 	if len(bbox) > 4 {
 		err = errors.New("bbox with 6 elements not supported")
 		return
@@ -313,6 +315,11 @@ func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, colle
 			}
 		}
 		result.Features = append(result.Features, feature)
+	}
+
+	// set the next page flag
+	if uint64(result.NumberReturned) == limit {
+		result.Next = true
 	}
 
 	return

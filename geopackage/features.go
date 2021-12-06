@@ -45,7 +45,7 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 			continue
 		}
 
-		fcGeoJSON, err := gp.GeoPackage.GetFeatures(r.Context(), gp.GeoPackage.DB, cn, collectionId, offsetParam, limitParam, nil, bboxParam)
+		fcGeoJSON, err := gp.GeoPackage.GetFeatures(r.Context(), gp.GeoPackage.DB, cn, features.NewFeaturesParams(), collectionId, offsetParam, limitParam, nil, bboxParam)
 
 		if err != nil {
 			return nil, err

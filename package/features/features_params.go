@@ -11,9 +11,6 @@ type FeaturesParams struct {
 
 func NewFeaturesParams() *FeaturesParams {
   return &FeaturesParams{
-    CollectionId: "addresses",
-    Limit:        100,
-    Offset:       0,
     ContentType:  "application/json",
   }
 }
