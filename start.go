@@ -144,6 +144,7 @@ func addPackageHandler(router *server.RegexpHandler, dsrc *core.Config) {
 	mountingPath := "/package"
 	engine := apif.NewSimpleEngine(mountingPath)
 	apif.AddBaseJSONTemplates(engine)
+	apif.AddBaseHTMLTemplates(engine)
 
 	config := engine.Config()
 	config.SetTitle("goaf Demo instance - running latest GitHub version")

@@ -1,6 +1,7 @@
 package apif
 
 import(
+  "fmt"
   "net/http"
   "regexp"
   "strings"
@@ -148,8 +149,7 @@ func (router *router) HandleRequest(w http.ResponseWriter, r *http.Request) {
       continue
     }
 
-    contenttype := "application/json"
-    handler := route.handlers[contenttype]
+    handler := findHandler(r.Header.Get("Accept"), route.handlers)
     if handler == nil {
       http.NotFound(w, r)
       return
@@ -301,4 +301,17 @@ func NewMatchedRoute() *MatchedRoute {
 
 func (route *MatchedRoute) Get(key string) string {
   return route.Parameters[key]
+}
+
+func findHandler(accept string, handlers map[string]*Handler) *Handler {
+  fmt.Printf("Accept: %v\n", accept)
+  for _, contentType := range strings.Split(accept, ",") {
+    handler := handlers[contentType]
+    if handler != nil {
+      return handler
+    }
+  }
+
+  defaultContentType := "application/json"
+  return handlers[defaultContentType]
 }
