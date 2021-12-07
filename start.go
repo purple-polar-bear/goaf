@@ -153,6 +153,7 @@ func addPackageHandler(router *server.RegexpHandler, dsrc *core.Config) {
 	featuredatasource := geopackage.Init(*dsrc)
 	apif.EnableFeatures(engine, featuredatasource)
 	apif.AddFeaturesJSONTemplates(engine)
+	apif.AddFeaturesHTMLTemplates(engine)
 
 	router.HandleFunc(regexp.MustCompile("^"+mountingPath), engine.HTTPHandler)
 }

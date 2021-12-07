@@ -107,7 +107,7 @@ func (service *featureService) Features(r *http.Request, params *features.Featur
 	return fcGeoJSON
 }
 
-func (service *featureService) Feature(id string) *features.Feature {
+func (service *featureService) Feature(collectionId string, id string) *features.Feature {
 	geometry := geom.Point{4.873270473933632, 53.083485031473046}
 	properties := make(map[string]interface{})
 	properties["component_addressareaname"] = "Oosterend"

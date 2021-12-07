@@ -40,6 +40,14 @@ func AddFeaturesJSONTemplates(engine Engine) {
   engine.AddTemplate("feature", "data item in json format", "application/json", "data", renderer)
 }
 
+func AddFeaturesHTMLTemplates(engine Engine) {
+  renderer := htmltemplates.NewFeatureRenderer()
+  engine.AddTemplate("featurecollections", "data collections in html format", "text/html", "data", renderer)
+  engine.AddTemplate("featurecollection", "data collection in html format", "text/html", "data", renderer)
+  engine.AddTemplate("features", "data items in html format", "text/html", "data", renderer)
+  engine.AddTemplate("feature", "data item in html format", "text/html", "data", renderer)
+}
+
 // Add a template to the engine
 func (engine *engine) AddTemplate(name string, title string, contenttype string, rel string, renderer interface{}) {
   controller := engine.Controller(name)

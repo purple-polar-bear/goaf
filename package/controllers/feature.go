@@ -19,18 +19,37 @@ func (controller *FeatureController) HandleFunc(app models.Application, r interf
   renderer := r.(coretemplates.RenderFeaturesType)
 
   return func(w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
-    // featuresRoute := app.Templates("features", "")
+    templates := app.Templates("feature", "")
 
     featureService, ok := app.GetService("features").(features.FeatureService)
     if !ok {
       panic("Cannot find featureservice")
     }
 
+    collectionId := routeParameters.Get("collection_id")
     id := routeParameters.Get("item_id")
-    feature := featureService.Feature(id)
+    feature := featureService.Feature(collectionId, id)
+    baseUrl := app.Config().FullUri()
+    hrefParams := make(map[string]string)
+    hrefParams["collection_id"] = collectionId
+    hrefParams["item_id"] = id
+    links := []*viewmodels.Link{}
+    // current link
+    for _, template := range templates {
+  		baseHref := template.Href(baseUrl, hrefParams)
+      link := &viewmodels.Link{
+        Title: template.Title(),
+        Rel: template.Rel(),
+        Type: template.Type(),
+        Href: baseHref,
+      }
+
+  		links = append(links, link)
+  	}
+
     resource := &viewmodels.Feature{
       Feature: feature,
-      Links: []viewmodels.Link{},
+      Links: links,
     }
     renderer.RenderItem(models.NewWebcontext(w, r), resource)
   }

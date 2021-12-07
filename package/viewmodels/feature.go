@@ -9,7 +9,7 @@ type Feature struct {
 	// overwrite ID in geojson.Feature so strings are also allowed as id
 	Feature interface{}
 	// Added Links in de document
-	Links []Link `json:"links,omitempty"`
+	Links []*Link `json:"links,omitempty"`
 }
 
 func (c *Feature) MarshalJSON() ([]byte, error) {
