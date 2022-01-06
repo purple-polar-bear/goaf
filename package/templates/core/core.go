@@ -7,6 +7,7 @@ import(
 
 // Interface definition for features renderer
 type RenderCoreType interface {
-  RenderCollections(context *models.Webcontext, collections *viewmodels.Collections)
-  RenderCollection(context *models.Webcontext, collection *viewmodels.Collection)
+  RenderLandingpage(context *models.Webcontext, landingpage *viewmodels.Landingpage)
+  RenderConformance(context *models.Webcontext, conformanceClasses *viewmodels.Conformanceclasses)
+  RenderAPI(context *models.Webcontext, api interface{})
 }

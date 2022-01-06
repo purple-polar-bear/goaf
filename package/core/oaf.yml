@@ -1,9 +1,9 @@
 openapi: 3.0.2
 info:
-  title: "Kadaster - PDOK API conforming to the standard OGC API - Features - Part 1: Core"
+  title: "API conforming to the standard OGC API - Features - Part 1: Core"
   version: '1.0.0'
   description: |-
-    This is a Kadaster - PDOK OpenAPI definition that conforms to the conformance
+    This is a OpenAPI definition that conforms to the conformance
     classes "Core", "GeoJSON", "HTML" and "OpenAPI 3.0" of the
     standard <a href="http://docs.ogc.org/is/17-069r3/17-069r3.html">"OGC API - Features - Part 1: Core"</a>.
 
@@ -12,14 +12,12 @@ info:
     The generic OpenAPI definition does not provide any details on the
     collections or the feature content. This information is only available
     from accessing the feature collection resources.
-
-    that specifies each collection explicitly.
   contact:
-    name: PDOK
-    url: 'https://pdok.nl/contact'
+    name: Unknown
+    # url: 'https://unknown'
   license:
-    name: CC-BY 4.0 license
-    url: 'https://creativecommons.org/licenses/by/4.0/'
+    name: All rights reserved
+    # url: 'https://creativecommons.org/licenses/by/4.0/'
 tags:
   - name: Capabilities
     description: |-
@@ -40,16 +38,6 @@ components:
         type: integer
       style: form
       explode: false
-    f:
-      name: f
-      in: query
-      description: |-
-        The optional format parameter determines the outputformat, default json.
-      required: false
-      schema:
-        type: string
-      style: form
-      explode: false
 paths:
   '/':
     get:
@@ -61,7 +49,6 @@ paths:
         statements and to the feature collections in this dataset.
       operationId: getLandingPage
       parameters:
-        - $ref: '#/components/parameters/f'
       responses:
         '200':
           $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/LandingPage'
@@ -77,7 +64,6 @@ paths:
         server conforms to.
       operationId: getConformanceDeclaration
       parameters:
-        - $ref: '#/components/parameters/f'
       responses:
         '200':
           $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ConformanceDeclaration'
@@ -90,7 +76,6 @@ paths:
       summary: the feature collections in the dataset
       operationId: getCollections
       parameters:
-        - $ref: '#/components/parameters/f'
       responses:
         '200':
           $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Collections'
@@ -105,7 +90,6 @@ paths:
       operationId: describeCollection
       parameters:
         - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/collectionId'
-        - $ref: '#/components/parameters/f'
       responses:
         '200':
           $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Collection'
@@ -131,7 +115,6 @@ paths:
         - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/collectionId'
         - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/f'
         - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/bbox'
         - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/datetime'
       responses:
@@ -157,7 +140,6 @@ paths:
       parameters:
         - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/collectionId'
         - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/featureId'
-        - $ref: '#/components/parameters/f'
       responses:
         '200':
           $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Feature'

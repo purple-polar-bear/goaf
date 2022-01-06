@@ -27,12 +27,12 @@ func (controller *FeatureController) HandleFunc(app models.Application, r interf
     }
 
     collectionId := routeParameters.Get("collection_id")
-    id := routeParameters.Get("item_id")
-    feature := featureService.Feature(collectionId, id)
+    featureId := routeParameters.Get("item_id")
+    feature := featureService.Feature(collectionId, featureId)
     baseUrl := app.Config().FullUri()
     hrefParams := make(map[string]string)
     hrefParams["collection_id"] = collectionId
-    hrefParams["item_id"] = id
+    hrefParams["item_id"] = featureId
     links := []*viewmodels.Link{}
     // current link
     for _, template := range templates {

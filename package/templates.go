@@ -2,7 +2,6 @@ package apif
 
 import(
   "oaf-server/package/models"
-  "oaf-server/package/templates/core"
   "oaf-server/package/templates/json"
   "oaf-server/package/templates/html"
 )
@@ -20,8 +19,10 @@ type Template struct {
 }
 
 func AddBaseJSONTemplates(engine Engine) {
-  engine.AddTemplate("landingpage", "this landing page in json format", "application/json", "self", coretemplates.NewRenderLandingpageType(jsontemplates.RenderLandingpage))
-  engine.AddTemplate("conformance", "conformance capabilities in json format", "application/json", "conformance", coretemplates.NewRenderConformanceType(jsontemplates.RenderConformance))
+  renderer := jsontemplates.NewCoreRenderer()
+  engine.AddTemplate("landingpage", "this landing page in json format", "application/json", "self", renderer)
+  engine.AddTemplate("conformance", "conformance capabilities in json format", "application/json", "conformance", renderer)
+  engine.AddTemplate("api", "API capabilities in json format", "application/json", "service-desc", renderer)
 }
 
 // Shortcut functions to add HTML responses to base endpoints

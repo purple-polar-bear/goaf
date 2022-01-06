@@ -8,6 +8,7 @@ import (
 	"oaf-server/core"
 	"oaf-server/geopackage"
 	apif "oaf-server/package"
+	"oaf-server/package/core"
 	"oaf-server/postgis"
 	"oaf-server/server"
 	"os"
@@ -149,6 +150,15 @@ func addPackageHandler(router *server.RegexpHandler, dsrc *core.Config) {
 	config := engine.Config()
 	config.SetTitle("goaf Demo instance - running latest GitHub version")
 	config.SetDescription("goaf provides an API to geospatial data")
+
+	apiService := engine.GetService("core").(apifcore.CoreService)
+	apiService.SetContact(&apifcore.ContactInfo{Name: "PDOK", Url: "https://pdok.nl/contact"})
+	apiService.SetLicense(&apifcore.LicenseInfo{Name: "CC-BY 4.0 license", Url: "https://creativecommons.org/licenses/by/4.0/"})
+	ctUrlEncoder := apifcore.NewContentTypeUrlEncoding("f")
+	ctUrlEncoder.AddContentType("json", "application/json")
+	ctUrlEncoder.AddContentType("html", "text/html")
+	apiService.SetContentTypeUrlEncoder(ctUrlEncoder)
+	apiService.RebuildOpenAPI()
 
 	featuredatasource := geopackage.Init(*dsrc)
 	apif.EnableFeatures(engine, featuredatasource)

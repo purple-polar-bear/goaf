@@ -4,6 +4,7 @@ import(
   "net/http"
   "strings"
   "oaf-server/package/controllers"
+  "oaf-server/package/core"
   "oaf-server/package/features"
   "oaf-server/package/models"
 )
@@ -97,6 +98,17 @@ func NewSimpleEngine(mountingpath string) *engine {
     LandingpageVisible: true,
   })
 
+  apiController := &apifcontrollers.APIController{}
+  engine.AddRoute(&Routedef{
+    Name: "api",
+    Path: "api",
+    Controller: apiController,
+    LandingpageVisible: true,
+  })
+
+  service := apifcore.NewCoreService()
+  engine.AddService("core", service)
+
   return engine
 }
 
@@ -130,6 +142,9 @@ func EnableFeatures(engine *engine, service features.FeatureService) {
   })
 
   engine.AddService("features", service)
+}
+
+func EnableAPISpecification(engine *engine) {
 }
 
 /*
