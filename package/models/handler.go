@@ -3,13 +3,13 @@ package models
 // A typeroute is a route with a given content type
 type Handler interface {
   Title() string
-  Rel() string
-  Type() string
-  Href(string, map[string]string) string
-}
 
-/*
-func (handler *Handler) Href(baseUrl string) string {
-  return baseUrl + handler.RelativeHref;
+  // Determine the relation-type of this handler. The parameter contains the
+  // actual contenttype
+  Rel(string) string
+
+  Type() string
+
+  // Calculates the full URL of the handler
+  Href(string, map[string]string, *ContentTypeUrlEncoding) string
 }
-*/

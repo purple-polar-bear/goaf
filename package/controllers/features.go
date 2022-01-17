@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"oaf-server/package/core"
 	"oaf-server/package/features"
 	"oaf-server/package/models"
 	coretemplates "oaf-server/package/templates/core"
@@ -17,7 +18,7 @@ type FeaturesController struct {
 func (controller *FeaturesController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
   renderer := r.(coretemplates.RenderFeaturesType)
 
-  return func(w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
+  return func(handler models.Handler, w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
     featuresRoute := app.Templates("features", "")
 		r.ParseForm()
 		urlValues := r.Form
@@ -27,9 +28,15 @@ func (controller *FeaturesController) HandleFunc(app models.Application, r inter
       panic("Cannot find featureservice")
     }
 
+		coreservice, ok := app.GetService("core").(apifcore.CoreService)
+    if !ok {
+      panic("Cannot find coreservice")
+    }
+
+    encoding := coreservice.ContentTypeUrlEncoder()
     featureParams := buildFeatureParams(app, routeParameters, urlValues)
     features := featureService.Features(r, featureParams)
-    links := BuildFeaturesLinks(app, featuresRoute, featureParams, features, featureParams)
+    links := BuildFeaturesLinks(handler, app, encoding, featuresRoute, featureParams, features, featureParams)
 
     resource := viewmodels.NewFeatureCollection()
     items := features.Items()
@@ -53,7 +60,7 @@ func buildFeatureParams(app models.Application, routeParameters models.MatchedRo
   return params
 }
 
-func BuildFeaturesLinks(app models.Application, templates []models.Handler, params *features.FeaturesParams, features features.Features, featureParams *features.FeaturesParams) []*viewmodels.Link {
+func BuildFeaturesLinks(handler models.Handler, app models.Application, encoding *models.ContentTypeUrlEncoding, templates []models.Handler, params *features.FeaturesParams, features features.Features, featureParams *features.FeaturesParams) []*viewmodels.Link {
 	baseUrl := app.Config().FullUri()
 	hrefParams := make(map[string]string)
   hrefParams["collection_id"] = featureParams.CollectionId
@@ -61,10 +68,10 @@ func BuildFeaturesLinks(app models.Application, templates []models.Handler, para
   result := []*viewmodels.Link{}
 	// current link
   for _, template := range templates {
-		baseHref := template.Href(baseUrl, hrefParams)
+		baseHref := template.Href(baseUrl, hrefParams, encoding)
     link := &viewmodels.Link{
       Title: template.Title(),
-      Rel: template.Rel(),
+      Rel: template.Rel(handler.Type()),
       Type: template.Type(),
       Href: BuildFeaturesUrl(baseHref, featureParams.Limit, featureParams.Offset),
     }
@@ -75,10 +82,10 @@ func BuildFeaturesLinks(app models.Application, templates []models.Handler, para
 	// next link (if applicable)
 	if features.HasNext() {
 		for _, template := range templates {
-			baseHref := template.Href(baseUrl, hrefParams)
+			baseHref := template.Href(baseUrl, hrefParams, encoding)
 	    link := &viewmodels.Link{
 	      Title: template.Title(),
-	      Rel: template.Rel(),
+	      Rel: template.Rel(handler.Type()),
 	      Type: template.Type(),
 	      Href: BuildFeaturesUrl(baseHref, features.NextLimit(), features.NextOffset()),
 	    }

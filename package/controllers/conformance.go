@@ -40,8 +40,8 @@ func defaultConformanceClasses() []string {
 }
 
 func (controller *conformanceController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
-  renderer := r.(coretemplates.RenderConformanceType)
-  return func(w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
+  renderer := r.(coretemplates.RenderCoreType)
+  return func(handler models.Handler, w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
     resource := &viewmodels.Conformanceclasses{
       ConformsTo: controller.ConformanceClasses(),
     }

@@ -3,6 +3,7 @@ package apifcontrollers
 import(
   "net/http"
 
+  "oaf-server/package/core"
   "oaf-server/package/features"
   "oaf-server/package/models"
   "oaf-server/package/viewmodels"
@@ -18,7 +19,7 @@ type FeatureController struct {
 func (controller *FeatureController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
   renderer := r.(coretemplates.RenderFeaturesType)
 
-  return func(w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
+  return func(handler models.Handler, w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
     templates := app.Templates("feature", "")
 
     featureService, ok := app.GetService("features").(features.FeatureService)
@@ -26,6 +27,12 @@ func (controller *FeatureController) HandleFunc(app models.Application, r interf
       panic("Cannot find featureservice")
     }
 
+    coreservice, ok := app.GetService("core").(apifcore.CoreService)
+    if !ok {
+      panic("Cannot find coreservice")
+    }
+
+    encoding := coreservice.ContentTypeUrlEncoder()
     collectionId := routeParameters.Get("collection_id")
     featureId := routeParameters.Get("item_id")
     feature := featureService.Feature(collectionId, featureId)
@@ -36,10 +43,10 @@ func (controller *FeatureController) HandleFunc(app models.Application, r interf
     links := []*viewmodels.Link{}
     // current link
     for _, template := range templates {
-  		baseHref := template.Href(baseUrl, hrefParams)
+  		baseHref := template.Href(baseUrl, hrefParams, encoding)
       link := &viewmodels.Link{
         Title: template.Title(),
-        Rel: template.Rel(),
+        Rel: template.Rel(handler.Type()),
         Type: template.Type(),
         Href: baseHref,
       }

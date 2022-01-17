@@ -32,6 +32,12 @@ type Serverconfig interface {
   // Mounting path on which clients can access the server.
   Mountingpath() string
 
+  // Returns the full host, including protocol and port, eg:
+  // https://organisation.com:8080
+  FullHost() string
+
+  // Returns the full path of the mounted application, eg:
+  // https://organisation.com:8080/endpoint
   FullUri() string
 
   SetTitle(string)
@@ -85,9 +91,14 @@ func (config *serverconfig) Mountingpath() string {
   return config.mountingpath
 }
 
-func (config *serverconfig) FullUri() string {
+func (config *serverconfig) FullHost() string {
   result := config.Protocol() + "://" + config.Host()
   result += ":" + strconv.Itoa(config.Port())
+  return result
+}
+
+func (config *serverconfig) FullUri() string {
+  result := config.FullHost()
   result += config.Mountingpath()
   return result
 }

@@ -15,7 +15,9 @@ type Application interface {
   Templates(string, string) []Handler
 
   GetService(string) interface{}
+
+  RebuildOpenAPI()
 }
 
 // Function signature of the callbacks from the router
-type ControllerFunc func(w http.ResponseWriter, r *http.Request, routeParameters MatchedRouteParameters)
+type ControllerFunc func(handler Handler, w http.ResponseWriter, r *http.Request, routeParameters MatchedRouteParameters)

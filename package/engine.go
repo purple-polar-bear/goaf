@@ -1,8 +1,10 @@
 package apif
 
 import(
+  "fmt"
   "net/http"
   "strings"
+
   "oaf-server/package/controllers"
   "oaf-server/package/core"
   "oaf-server/package/features"
@@ -38,6 +40,9 @@ type Engine interface {
 
   // Returns a service
   GetService(string) interface{}
+
+  // Returns all the services
+  RebuildOpenAPI()
 }
 
 type engine struct {
@@ -160,7 +165,13 @@ func (c *engine) HTTPHandler(w http.ResponseWriter, r *http.Request) {
     panic("Apif controller is not mounted")
   }
 
-  c.router.HandleRequest(w, r)
+  coreservice := c.GetService("core").(apifcore.CoreService)
+  if(coreservice == nil) {
+    panic("Core service is not defined")
+  }
+
+  fmt.Printf("Handling request: %s with header %v\n", r.URL.EscapedPath(), r.Form)
+  c.router.HandleRequest(coreservice, w, r)
 }
 
 func (e *engine) AddRoute(routedefinition *Routedef) {
@@ -201,10 +212,25 @@ func (e *engine) AddConformanceClass(conformanceclass string) {
 
 func (e *engine) AddService(name string, service interface{}) {
   e.services[name] = service
+
+  configService, ok := service.(models.ConfigurableService)
+  if ok {
+    configService.SetConfig(e.serverconfig)
+  }
 }
 
 func (e *engine) GetService(name string) interface{} {
   return e.services[name]
+}
+
+func (e *engine) RebuildOpenAPI() {
+  service := e.GetService("core").(apifcore.CoreService)
+  services := []interface{}{}
+  for _, service := range e.services {
+    services = append(services, service)
+  }
+
+  service.RebuildOpenAPI(services)
 }
 
 func (e *engine) Routes() []models.Route {

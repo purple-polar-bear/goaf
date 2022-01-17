@@ -14,7 +14,7 @@ type APIController struct {
 func (controller *APIController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
   renderer := r.(coretemplates.RenderCoreType)
 
-  return func(w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
+  return func(handler models.Handler, w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
     apiService, ok := app.GetService("core").(apifcore.CoreService)
     if !ok {
       panic("Cannot find featureservice")

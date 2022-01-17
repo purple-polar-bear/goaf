@@ -1,8 +1,7 @@
 package apifcore
 
 import(
-  "fmt"
-
+  "oaf-server/package/models"
   "github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -10,12 +9,16 @@ type CoreService interface {
   OpenAPI() *openapi3.T
   SetContact(*ContactInfo)
   SetLicense(*LicenseInfo)
-  SetContentTypeUrlEncoder(*ContentTypeUrlEncoding)
-  ContentTypeUrlEncoder() *ContentTypeUrlEncoding
+  SetContentTypeUrlEncoder(*models.ContentTypeUrlEncoding)
+  ContentTypeUrlEncoder() *models.ContentTypeUrlEncoding
 
   // Method to rebuild the OpenAPI specification. It is recommended to call
   // this method, in order to easy error handling.
-  RebuildOpenAPI()
+  RebuildOpenAPI([]interface{})
+}
+
+type OpenAPIService interface {
+  BuildOpenAPISpecification(OpenAPIBuilder)
 }
 
 type ContactInfo struct {
@@ -28,20 +31,15 @@ type LicenseInfo struct {
   Url string
 }
 
-type ContentTypeUrlEncoding struct {
-  ParameterName string
-  OverrideHeader bool
-  Encodings map[string]string
-}
-
 type coreService struct {
   ContactInfo *ContactInfo
   LicenseInfo *LicenseInfo
-  ContentTypeUrlEncoding *ContentTypeUrlEncoding
+  ContentTypeUrlEncoding *models.ContentTypeUrlEncoding
 
   loader *openapi3.Loader
   basicOpenAPI *openapi3.T
   openAPI *openapi3.T
+  config models.Serverconfig
 }
 
 func NewCoreService() CoreService {
@@ -69,11 +67,11 @@ func (service *coreService) SetLicense(info *LicenseInfo) {
   service.LicenseInfo = info
 }
 
-func (service *coreService) SetContentTypeUrlEncoder(contentTypeUrlEncoding *ContentTypeUrlEncoding) {
+func (service *coreService) SetContentTypeUrlEncoder(contentTypeUrlEncoding *models.ContentTypeUrlEncoding) {
   service.ContentTypeUrlEncoding = contentTypeUrlEncoding
 }
 
-func (service *coreService) ContentTypeUrlEncoder() *ContentTypeUrlEncoding {
+func (service *coreService) ContentTypeUrlEncoder() *models.ContentTypeUrlEncoding {
   return service.ContentTypeUrlEncoding
 }
 
@@ -81,23 +79,21 @@ func (service *coreService) OpenAPI() *openapi3.T {
   return service.openAPI
 }
 
-func (service *coreService) RebuildOpenAPI()() {
-  api := service.basicOpenAPI
-  copy := &openapi3.T{}
-  data, err := api.MarshalJSON()
-  if err != nil {
-    panic(fmt.Sprintf("Error in base OpenAPI file: %s", err))
-  }
+func (service *coreService) RebuildOpenAPI(services []interface{})() {
+  builder := NewOpenAPIBuilder(service.basicOpenAPI, service.loader)
+  service.openAPI = builder.Build(services)
+}
 
-  copy.UnmarshalJSON(data)
+func (service *coreService) BuildOpenAPISpecification(builder OpenAPIBuilder) {
+  target := builder.OpenAPI()
   if service.ContactInfo != nil {
-    copy.Info.Contact.Name = service.ContactInfo.Name
-    copy.Info.Contact.URL = service.ContactInfo.Url
+    target.Info.Contact.Name = service.ContactInfo.Name
+    target.Info.Contact.URL = service.ContactInfo.Url
   }
 
   if service.LicenseInfo != nil {
-    copy.Info.License.Name = service.LicenseInfo.Name
-    copy.Info.License.URL = service.LicenseInfo.Url
+    target.Info.License.Name = service.LicenseInfo.Name
+    target.Info.License.URL = service.LicenseInfo.Url
   }
 
   // ContentType encoding via url parameter
@@ -111,56 +107,43 @@ func (service *coreService) RebuildOpenAPI()() {
     explode := false
     parameter.Explode = &explode
     parameterRef := &openapi3.ParameterRef{Value: parameter}
-    copy.Components.Parameters[encoder.ParameterName] = parameterRef
+    target.Components.Parameters[encoder.ParameterName] = parameterRef
     pathParameterRef := &openapi3.ParameterRef{Ref: "#/components/parameters/" + encoder.ParameterName, Value: parameter}
-    for _, path := range copy.Paths {
+    for _, path := range target.Paths {
       for _, operation := range path.Operations() {
         operation.Parameters = append(operation.Parameters, pathParameterRef)
       }
     }
   }
 
-  // Add stuff from other services
-  featureServiceBuildOpenAPI(copy)
-
-  // Validating the Swagger file
-  // err = copy.Validate(service.loader.Context)
-  if err != nil {
-    panic(fmt.Sprintf("Could not validate Swagger definition: %s", err))
+  // add server
+  server := &openapi3.Server{
+    URL: service.config.FullHost(),
+    Description: "Production server",
   }
-
-  service.openAPI = copy
+  target.Servers = append(target.Servers, server)
 }
 
-func featureServiceBuildOpenAPI(openapi *openapi3.T) {
+// Implement ConfigurableService
+func (service *coreService) SetConfig(config models.Serverconfig) {
+  service.config = config
+}
+
+
+func featureServiceBuildOpenAPI(builder OpenAPIBuilder) {
   parameterName := "featureId"
   parameter := openapi3.NewPathParameter(parameterName).
     WithDescription("local identifier of a feature").
     WithRequired(true).
     WithSchema(openapi3.NewStringSchema())
-  AddComponentParameter(openapi, parameterName, parameter)
+  parameter.Style = openapi3.SerializationForm
+  builder.AddComponentParameter(parameterName, parameter)
 
   parameterName = "collectionId"
   parameter = openapi3.NewPathParameter(parameterName).
     WithDescription("local identifier of a collection").
     WithRequired(true).
     WithSchema(openapi3.NewStringSchema())
-  AddComponentParameter(openapi, parameterName, parameter)
-}
-
-func AddComponentParameter(openapi *openapi3.T, parameterName string, parameter *openapi3.Parameter) {
-  parameterRef := &openapi3.ParameterRef{Value: parameter}
-  openapi.Components.Parameters[parameterName] = parameterRef
-}
-
-func NewContentTypeUrlEncoding(parameterName string) *ContentTypeUrlEncoding {
-  return &ContentTypeUrlEncoding{
-    ParameterName: parameterName,
-    OverrideHeader: true,
-    Encodings: make(map[string]string),
-  }
-}
-
-func (encoder *ContentTypeUrlEncoding) AddContentType(parameterValue string, contentType string) {
-  encoder.Encodings[parameterValue] = contentType
+  parameter.Style = openapi3.SerializationForm
+  builder.AddComponentParameter(parameterName, parameter)
 }

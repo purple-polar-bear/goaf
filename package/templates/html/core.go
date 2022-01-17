@@ -11,6 +11,7 @@ func NewCoreRenderer() *CoreRenderer {
   templates := NewTemplate([]string{
     "conformance.html",
     "landingpage.html",
+    "api.html",
   })
 
   return &CoreRenderer{
@@ -29,4 +30,8 @@ func (renderer *CoreRenderer) RenderLandingpage(context *models.Webcontext, land
 
 func (renderer *CoreRenderer) RenderConformance(context *models.Webcontext, conformanceClasses *viewmodels.Conformanceclasses) {
   renderer.Templates.ExecuteTemplate(context.W, "conformance.html", conformanceClasses)
+}
+
+func (renderer *CoreRenderer) RenderAPI(context *models.Webcontext, api interface{}) {
+  renderer.Templates.ExecuteTemplate(context.W, "api.html", api)
 }

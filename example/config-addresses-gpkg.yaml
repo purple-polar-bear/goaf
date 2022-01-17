@@ -1,7 +1,7 @@
 service:
   name: goaf Demo instance - running latest GitHub version
   description: goaf provides an API to geospatial data
-  url: http://localhost:8080
+  url: http://172.17.0.1:8080
   keywords:
   - geospatial
   - data

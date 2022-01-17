@@ -6,12 +6,13 @@ import(
   "regexp"
   "strings"
 
+  "oaf-server/package/core"
   "oaf-server/package/models"
 )
 
 type Router interface {
   // Handler for requests
-  HandleRequest(w http.ResponseWriter, request *http.Request)
+  HandleRequest(coreservice apifcore.CoreService, w http.ResponseWriter, request *http.Request)
 
   AddRoute(routedefinition *Routedef)
 
@@ -100,7 +101,7 @@ func NewRouter(serverconfig models.Serverconfig) *router {
 }
 
 // Handles requests
-func (router *router) HandleRequest(w http.ResponseWriter, r *http.Request) {
+func (router *router) HandleRequest(coreservice apifcore.CoreService, w http.ResponseWriter, r *http.Request) {
   absolutePath := r.URL.EscapedPath()
   mountingpath := router.serverconfig.Mountingpath()
 
@@ -128,6 +129,12 @@ func (router *router) HandleRequest(w http.ResponseWriter, r *http.Request) {
     }
   }
 
+  // Parse the forms
+  r.ParseForm()
+
+  // construct the accept header
+  accept := buildAcceptValue(r, coreservice.ContentTypeUrlEncoder())
+
   // try to match the path
   for _, route := range router.routes {
     if len(route.UrlParts) != pathPartsLen {
@@ -149,13 +156,13 @@ func (router *router) HandleRequest(w http.ResponseWriter, r *http.Request) {
       continue
     }
 
-    handler := findHandler(r.Header.Get("Accept"), route.handlers)
+    handler := findHandler(accept, route.handlers)
     if handler == nil {
       http.NotFound(w, r)
       return
     }
 
-    handler.controllerFunc(w, r, routeParameters)
+    handler.controllerFunc(handler, w, r, routeParameters)
     return
   }
 
@@ -276,7 +283,18 @@ func (handler *Handler) Title() string {
   return handler.title
 }
 
-func (handler *Handler) Rel() string {
+// Builds the relation type value
+// It uses the provided content type to determine if 'self' relations must be
+// converted to alternate
+func (handler *Handler) Rel(contenttype string) string {
+  if handler.rel == "self" {
+    if handler.contenttype == contenttype {
+      return "self"
+    }
+
+    return "alternate"
+  }
+
   return handler.rel
 }
 
@@ -284,12 +302,21 @@ func (handler *Handler) Type() string {
   return handler.contenttype
 }
 
-func (handler *Handler) Href(baseUrl string, params map[string]string) string {
+func (handler *Handler) Href(baseUrl string, params map[string]string, encoder *models.ContentTypeUrlEncoding) string {
   parsedUrl := handler.route.MatchUrl
   for key, value := range params {
     parsedUrl = strings.ReplaceAll(parsedUrl, ":" + key, value)
   }
-  return baseUrl + "/" + parsedUrl
+
+  urlFormat := ""
+  if encoder != nil {
+    contenttypeEncoding := encoder.ReverseEncodings[handler.contenttype]
+    if contenttypeEncoding != "" {
+      urlFormat = "?" + encoder.ParameterName + "=" + contenttypeEncoding
+    }
+  }
+
+  return baseUrl + "/" + parsedUrl + urlFormat
 }
 
 // Matched route
@@ -314,4 +341,33 @@ func findHandler(accept string, handlers map[string]*Handler) *Handler {
 
   defaultContentType := "application/json"
   return handlers[defaultContentType]
+}
+
+func buildAcceptValue(r *http.Request, contentTypeUrlEncoder *models.ContentTypeUrlEncoding) string {
+  acceptHeader := r.Header.Get("accept")
+  if contentTypeUrlEncoder == nil {
+    return acceptHeader
+  }
+
+  urlHeaders := r.Form[contentTypeUrlEncoder.ParameterName]
+  if len(urlHeaders) == 0 {
+    return acceptHeader
+  }
+
+  urlHeader := urlHeaders[0]
+  urlHeaderValues := contentTypeUrlEncoder.Encodings[urlHeader]
+  if len(urlHeaderValues) == 0 {
+    return acceptHeader
+  }
+  urlHeaderValue := strings.Join(urlHeaderValues, ",")
+
+  acceptList := []string{}
+  if contentTypeUrlEncoder.OverrideHeader {
+    acceptList = []string{urlHeaderValue, acceptHeader}
+  } else {
+    acceptList = []string{acceptHeader, urlHeaderValue}
+  }
+  fmt.Printf("%v\n", acceptList)
+
+  return strings.Join(acceptList, ",")
 }

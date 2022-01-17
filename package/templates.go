@@ -22,7 +22,7 @@ func AddBaseJSONTemplates(engine Engine) {
   renderer := jsontemplates.NewCoreRenderer()
   engine.AddTemplate("landingpage", "this landing page in json format", "application/json", "self", renderer)
   engine.AddTemplate("conformance", "conformance capabilities in json format", "application/json", "conformance", renderer)
-  engine.AddTemplate("api", "API capabilities in json format", "application/json", "service-desc", renderer)
+  engine.AddTemplate("api", "API capabilities in json format", "application/vnd.oai.openapi+json;version=3.0", "service-desc", renderer)
 }
 
 // Shortcut functions to add HTML responses to base endpoints
@@ -30,6 +30,7 @@ func AddBaseHTMLTemplates(engine Engine) {
   renderer := htmltemplates.NewCoreRenderer()
   engine.AddTemplate("landingpage", "alternate landing page in html format", "text/html", "self", renderer)
   engine.AddTemplate("conformance", "conformance capabilities in html format", "text/html", "conformance", renderer)
+  engine.AddTemplate("api", "API capabilities in html format", "text/html", "service-doc", renderer)
 }
 
 // Shortcut functions to add JSON responses to all endpoints

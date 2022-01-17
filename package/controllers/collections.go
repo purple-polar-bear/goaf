@@ -3,6 +3,7 @@ package apifcontrollers
 import(
   "net/http"
 
+  "oaf-server/package/core"
   "oaf-server/package/features"
   "oaf-server/package/models"
   "oaf-server/package/viewmodels"
@@ -16,22 +17,26 @@ type CollectionsController struct {
 func (controller *CollectionsController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
   renderer := r.(coretemplates.RenderFeaturesType)
 
-  return func(w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
-    // Given some provider
-
-    collections := []*viewmodels.Collection{}
-    links := AddCollectionsLinkList(app)
-    collectionRoute := app.Templates("featurecollection", "")
-    collectionItemsRoute := append(collectionRoute, app.Templates("features", "")...)
-
+  return func(handler models.Handler, w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
     featureService, ok := app.GetService("features").(features.FeatureService)
     if !ok {
       panic("Cannot find featureservice")
     }
 
+    coreservice, ok := app.GetService("core").(apifcore.CoreService)
+    if !ok {
+      panic("Cannot find coreservice")
+    }
+
+    encoding := coreservice.ContentTypeUrlEncoder()
+    collections := []*viewmodels.Collection{}
+    links := AddCollectionsLinkList(handler, app, encoding)
+    collectionRoute := app.Templates("featurecollection", "")
+    collectionItemsRoute := append(collectionRoute, app.Templates("features", "")...)
+
     for _, collection := range featureService.Collections() {
-      collections = append(collections, BuildCollection(app, collection, collectionItemsRoute))
-      links = AddCollectionLinkList(links, app, collection, collectionRoute)
+      collections = append(collections, BuildCollection(handler, app, encoding, collection, collectionItemsRoute))
+      links = AddCollectionLinkList(handler, links, app, encoding, collection, collectionRoute)
     }
 
     resource := &viewmodels.Collections{
@@ -42,16 +47,16 @@ func (controller *CollectionsController) HandleFunc(app models.Application, r in
   }
 }
 
-func BuildCollection(app models.Application, collection features.Collection, templates []models.Handler) *viewmodels.Collection {
+func BuildCollection(handler models.Handler, app models.Application, encoding *models.ContentTypeUrlEncoding, collection features.Collection, templates []models.Handler) *viewmodels.Collection {
   return &viewmodels.Collection{
     Id: collection.Id(),
     Title: collection.Title(),
     Description: collection.Description(),
-    Links: AddCollectionLinkList([]*viewmodels.Link{}, app, collection, templates),
+    Links: AddCollectionLinkList(handler, []*viewmodels.Link{}, app, encoding, collection, templates),
   }
 }
 
-func AddCollectionsLinkList(app models.Application) []*viewmodels.Link {
+func AddCollectionsLinkList(handler models.Handler, app models.Application, encoding *models.ContentTypeUrlEncoding) []*viewmodels.Link {
   links := []*viewmodels.Link{}
   baseUrl := app.Config().FullUri()
   params := make(map[string]string)
@@ -59,9 +64,9 @@ func AddCollectionsLinkList(app models.Application) []*viewmodels.Link {
   for _, template := range templates {
     link := &viewmodels.Link{
       Title: template.Title(),
-      Rel: template.Rel(),
+      Rel: template.Rel(handler.Type()),
       Type: template.Type(),
-      Href: template.Href(baseUrl, params),
+      Href: template.Href(baseUrl, params, encoding),
     }
 
     links = append(links, link)
@@ -70,7 +75,7 @@ func AddCollectionsLinkList(app models.Application) []*viewmodels.Link {
   return links
 }
 
-func AddCollectionLinkList(links []*viewmodels.Link, app models.Application, collection features.Collection, templates []models.Handler) []*viewmodels.Link {
+func AddCollectionLinkList(handler models.Handler, links []*viewmodels.Link, app models.Application, encoding *models.ContentTypeUrlEncoding, collection features.Collection, templates []models.Handler) []*viewmodels.Link {
   baseUrl := app.Config().FullUri()
   params := make(map[string]string)
   params["collection_id"] = collection.Id()
@@ -78,9 +83,9 @@ func AddCollectionLinkList(links []*viewmodels.Link, app models.Application, col
   for _, template := range templates {
     link := &viewmodels.Link{
       Title: template.Title(),
-      Rel: template.Rel(),
+      Rel: template.Rel(handler.Type()),
       Type: template.Type(),
-      Href: template.Href(baseUrl, params),
+      Href: template.Href(baseUrl, params, encoding),
     }
 
     links = append(links, link)
