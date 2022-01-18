@@ -1,14 +1,15 @@
-package apif
+package apicore
 
 import(
   "fmt"
   "net/http"
   "strings"
 
+  "oaf-server/package/core/services"
+  "oaf-server/package/core/models"
+  "oaf-server/package/core/controllers"
   "oaf-server/package/controllers"
-  "oaf-server/package/core"
   "oaf-server/package/features"
-  "oaf-server/package/models"
 )
 
 // A controller for resolving the OGC Api Feature calls
@@ -22,14 +23,14 @@ type Engine interface {
   Mount(mountingPath string)
 
   // Template functions
-  Controller(name string) models.BaseController
+  Controller(name string) coremodels.BaseController
 
   // AddConformanceTemplate(title string, contentType string, renderer coretemplates.RenderConformanceType)
   AddTemplate(name string, title string, contenttype string, rel string, renderer interface{})
-  Templates(string, string) []models.Handler
+  Templates(string, string) []coremodels.Handler
 
   // Server configuration
-  Config() models.Serverconfig
+  Config() coremodels.Serverconfig
 
   // Router
   Router() Router
@@ -51,11 +52,11 @@ type engine struct {
 
   // list of controllers
   // path: routename -> controller
-  // controllers map[string]apifcontrollers.BaseController
+  // controllers map[string]corecontrollers.BaseController
   // list render functions
   // path: routename -> content type -> controller handler function with renderer
 
-  serverconfig models.Serverconfig
+  serverconfig coremodels.Serverconfig
 
   services map[string]interface{}
 }
@@ -64,7 +65,7 @@ type engine struct {
 //
 // This method does not require any furhter configuration
 func NewEngine() *engine {
-  config := models.NewServerConfig()
+  config := coremodels.NewServerConfig()
   engine := &engine{
     router: NewRouter(config),
     serverconfig: config,
@@ -87,7 +88,7 @@ func NewSimpleEngine(mountingpath string) *engine {
 
   engine.Config().SetMountingpath(mountingpath)
 
-  landingpageController := &apifcontrollers.LandingpageController{}
+  landingpageController := &corecontrollers.LandingpageController{}
   engine.AddRoute(&Routedef{
     Name: "landingpage",
     Path: "",
@@ -95,7 +96,7 @@ func NewSimpleEngine(mountingpath string) *engine {
     LandingpageVisible: true,
   })
 
-  conformanceController := apifcontrollers.NewConformanceController()
+  conformanceController := corecontrollers.NewConformanceController()
   engine.AddRoute(&Routedef{
     Name: "conformance",
     Path: "conformance",
@@ -103,7 +104,7 @@ func NewSimpleEngine(mountingpath string) *engine {
     LandingpageVisible: true,
   })
 
-  apiController := &apifcontrollers.APIController{}
+  apiController := &corecontrollers.APIController{}
   engine.AddRoute(&Routedef{
     Name: "api",
     Path: "api",
@@ -111,7 +112,7 @@ func NewSimpleEngine(mountingpath string) *engine {
     LandingpageVisible: true,
   })
 
-  service := apifcore.NewCoreService()
+  service := coreservices.NewCoreService()
   engine.AddService("core", service)
 
   return engine
@@ -155,7 +156,7 @@ func EnableAPISpecification(engine *engine) {
 /*
 func EnableTiles(engine *engine) {
   engine.AddConformanceClass("http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/tiles")
-  engine.tilesomethingController = apifcontrollers.TilesomethingController{}
+  engine.tilesomethingController = corecontrollers.TilesomethingController{}
   router.AddRoute("tiles", "/tiles", engine.tilesomethingController)
 }
 */
@@ -165,7 +166,7 @@ func (c *engine) HTTPHandler(w http.ResponseWriter, r *http.Request) {
     panic("Apif controller is not mounted")
   }
 
-  coreservice := c.GetService("core").(apifcore.CoreService)
+  coreservice := c.GetService("core").(coreservices.CoreService)
   if(coreservice == nil) {
     panic("Core service is not defined")
   }
@@ -183,12 +184,12 @@ func (c *engine) Mount(mountingpath string) {
   c.Config().SetMountingpath(mountingpath)
 }
 
-func (e *engine) Config() models.Serverconfig {
+func (e *engine) Config() coremodels.Serverconfig {
   return e.serverconfig
 }
 
-func (e *engine) Templates(url string, contenttype string) []models.Handler {
-  result := []models.Handler{}
+func (e *engine) Templates(url string, contenttype string) []coremodels.Handler {
+  result := []coremodels.Handler{}
   for _, handler := range e.router.Handlers() {
     if url != "" {
       if url != handler.route.name {
@@ -202,7 +203,7 @@ func (e *engine) Templates(url string, contenttype string) []models.Handler {
   return result
 }
 
-func (e *engine) Controller(name string) models.BaseController {
+func (e *engine) Controller(name string) coremodels.BaseController {
   return e.router.Controller(name)
 }
 
@@ -213,7 +214,7 @@ func (e *engine) AddConformanceClass(conformanceclass string) {
 func (e *engine) AddService(name string, service interface{}) {
   e.services[name] = service
 
-  configService, ok := service.(models.ConfigurableService)
+  configService, ok := service.(coremodels.ConfigurableService)
   if ok {
     configService.SetConfig(e.serverconfig)
   }
@@ -224,7 +225,7 @@ func (e *engine) GetService(name string) interface{} {
 }
 
 func (e *engine) RebuildOpenAPI() {
-  service := e.GetService("core").(apifcore.CoreService)
+  service := e.GetService("core").(coreservices.CoreService)
   services := []interface{}{}
   for _, service := range e.services {
     services = append(services, service)
@@ -233,7 +234,7 @@ func (e *engine) RebuildOpenAPI() {
   service.RebuildOpenAPI(services)
 }
 
-func (e *engine) Routes() []models.Route {
+func (e *engine) Routes() []coremodels.Route {
   return e.router.Routes()
 }
 

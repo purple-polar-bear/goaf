@@ -3,19 +3,19 @@ package apifcontrollers
 import(
   "net/http"
 
-  "oaf-server/package/core"
+  "oaf-server/package/core/services"
 	"oaf-server/package/features"
-  "oaf-server/package/models"
+  "oaf-server/package/core/models"
 	coretemplates "oaf-server/package/templates/core"
 )
 
 type CollectionController struct {
 }
 
-func (controller *CollectionController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
+func (controller *CollectionController) HandleFunc(app coremodels.Application, r interface{}) coremodels.ControllerFunc {
   renderer := r.(coretemplates.RenderFeaturesType)
 
-  return func(handler models.Handler, w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
+  return func(handler coremodels.Handler, w http.ResponseWriter, r *http.Request, routeParameters coremodels.MatchedRouteParameters) {
     name := routeParameters.Get("collection_id")
 
     featureService, ok := app.GetService("features").(features.FeatureService)
@@ -23,7 +23,7 @@ func (controller *CollectionController) HandleFunc(app models.Application, r int
       panic("Cannot find featureservice")
     }
 
-    coreservice, ok := app.GetService("core").(apifcore.CoreService)
+    coreservice, ok := app.GetService("core").(coreservices.CoreService)
     if !ok {
       panic("Cannot find coreservice")
     }
@@ -41,6 +41,6 @@ func (controller *CollectionController) HandleFunc(app models.Application, r int
     collectionItemsRoute := append(collectionRoute, app.Templates("features", "")...)
 
     resource := BuildCollection(handler, app, encoding, collection, collectionItemsRoute)
-    renderer.RenderCollection(models.NewWebcontext(w, r), resource)
+    renderer.RenderCollection(coremodels.NewWebcontext(w, r), resource)
   }
 }

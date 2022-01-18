@@ -1,4 +1,4 @@
-package models
+package coremodels
 
 type Exception struct {
   Code string `json:"code"`

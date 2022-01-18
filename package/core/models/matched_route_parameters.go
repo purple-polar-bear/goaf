@@ -1,4 +1,4 @@
-package models
+package coremodels
 
 // Parameters of a matched route
 // The MatchedRouteParameters contains only the URL matching. It is used

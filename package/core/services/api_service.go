@@ -1,7 +1,7 @@
-package apifcore
+package coreservices
 
 import(
-  "oaf-server/package/models"
+  "oaf-server/package/core/models"
   "github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -9,8 +9,8 @@ type CoreService interface {
   OpenAPI() *openapi3.T
   SetContact(*ContactInfo)
   SetLicense(*LicenseInfo)
-  SetContentTypeUrlEncoder(*models.ContentTypeUrlEncoding)
-  ContentTypeUrlEncoder() *models.ContentTypeUrlEncoding
+  SetContentTypeUrlEncoder(*coremodels.ContentTypeUrlEncoding)
+  ContentTypeUrlEncoder() *coremodels.ContentTypeUrlEncoding
 
   // Method to rebuild the OpenAPI specification. It is recommended to call
   // this method, in order to easy error handling.
@@ -34,12 +34,12 @@ type LicenseInfo struct {
 type coreService struct {
   ContactInfo *ContactInfo
   LicenseInfo *LicenseInfo
-  ContentTypeUrlEncoding *models.ContentTypeUrlEncoding
+  ContentTypeUrlEncoding *coremodels.ContentTypeUrlEncoding
 
   loader *openapi3.Loader
   basicOpenAPI *openapi3.T
   openAPI *openapi3.T
-  config models.Serverconfig
+  config coremodels.Serverconfig
 }
 
 func NewCoreService() CoreService {
@@ -67,11 +67,11 @@ func (service *coreService) SetLicense(info *LicenseInfo) {
   service.LicenseInfo = info
 }
 
-func (service *coreService) SetContentTypeUrlEncoder(contentTypeUrlEncoding *models.ContentTypeUrlEncoding) {
+func (service *coreService) SetContentTypeUrlEncoder(contentTypeUrlEncoding *coremodels.ContentTypeUrlEncoding) {
   service.ContentTypeUrlEncoding = contentTypeUrlEncoding
 }
 
-func (service *coreService) ContentTypeUrlEncoder() *models.ContentTypeUrlEncoding {
+func (service *coreService) ContentTypeUrlEncoder() *coremodels.ContentTypeUrlEncoding {
   return service.ContentTypeUrlEncoding
 }
 
@@ -125,7 +125,7 @@ func (service *coreService) BuildOpenAPISpecification(builder OpenAPIBuilder) {
 }
 
 // Implement ConfigurableService
-func (service *coreService) SetConfig(config models.Serverconfig) {
+func (service *coreService) SetConfig(config coremodels.Serverconfig) {
   service.config = config
 }
 

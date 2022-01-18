@@ -1,4 +1,4 @@
-package apifcore
+package coreservices
 
 import(
   "fmt"

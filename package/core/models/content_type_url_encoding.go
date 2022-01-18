@@ -1,4 +1,4 @@
-package models
+package coremodels
 
 // The ContentTypeUrlEncoding is the encoding of the content type (or format)
 // through the url parameters. This option is always optional.

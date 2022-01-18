@@ -1,4 +1,4 @@
-package apif
+package apicore
 
 import(
   "fmt"
@@ -6,28 +6,28 @@ import(
   "regexp"
   "strings"
 
-  "oaf-server/package/core"
-  "oaf-server/package/models"
+  "oaf-server/package/core/services"
+  "oaf-server/package/core/models"
 )
 
 type Router interface {
   // Handler for requests
-  HandleRequest(coreservice apifcore.CoreService, w http.ResponseWriter, request *http.Request)
+  HandleRequest(coreservice coreservices.CoreService, w http.ResponseWriter, request *http.Request)
 
   AddRoute(routedefinition *Routedef)
 
   Route(name string) *Route
 
-  Routes() []models.Route
-  Controller(name string) models.BaseController
-  // Controllers() [string]models.BaseController
+  Routes() []coremodels.Route
+  Controller(name string) coremodels.BaseController
+  // Controllers() [string]coremodels.BaseController
   //
   Handlers() []*Handler
 }
 
 type router struct {
   routes map[string]*Route
-  serverconfig models.Serverconfig
+  serverconfig coremodels.Serverconfig
 }
 
 type Route struct {
@@ -44,7 +44,7 @@ type Route struct {
   Pattern *regexp.Regexp
 
   // Controller to be invoked
-  Controller models.BaseController
+  Controller coremodels.BaseController
 
   // Handlers with templates
   handlers map[string]*Handler
@@ -75,14 +75,14 @@ type Handler struct {
   rel string
 
   // actual function
-  controllerFunc models.ControllerFunc
+  controllerFunc coremodels.ControllerFunc
 }
 
 // Definition struct used for creating new routes
 type Routedef struct {
   Name                string
   Path                string
-  Controller          models.BaseController
+  Controller          coremodels.BaseController
   LandingpageVisible  bool
 }
 
@@ -91,7 +91,7 @@ type MatchedRoute struct {
 }
 
 // Initializes a new router object
-func NewRouter(serverconfig models.Serverconfig) *router {
+func NewRouter(serverconfig coremodels.Serverconfig) *router {
 	router := &router{
     serverconfig: serverconfig,
     routes: make(map[string]*Route),
@@ -101,7 +101,7 @@ func NewRouter(serverconfig models.Serverconfig) *router {
 }
 
 // Handles requests
-func (router *router) HandleRequest(coreservice apifcore.CoreService, w http.ResponseWriter, r *http.Request) {
+func (router *router) HandleRequest(coreservice coreservices.CoreService, w http.ResponseWriter, r *http.Request) {
   absolutePath := r.URL.EscapedPath()
   mountingpath := router.serverconfig.Mountingpath()
 
@@ -178,8 +178,8 @@ func (r *Route) LandingpageVisible() bool {
   return r.landingpageVisible
 }
 
-func (r *Route) Handlers() map[string]models.Handler{
-  result := make(map[string]models.Handler)
+func (r *Route) Handlers() map[string]coremodels.Handler{
+  result := make(map[string]coremodels.Handler)
   for key, value := range r.handlers {
     result[key] = value
   }
@@ -212,8 +212,8 @@ func (r *router) Route(name string) *Route {
   return r.routes[name]
 }
 
-func (r *router) Routes() []models.Route {
-  result := make([]models.Route, 0, len(r.routes))
+func (r *router) Routes() []coremodels.Route {
+  result := make([]coremodels.Route, 0, len(r.routes))
   for _, route := range r.routes {
     result = append(result, route)
   }
@@ -221,7 +221,7 @@ func (r *router) Routes() []models.Route {
   return result
 }
 
-func (r *router) Controller(name string) models.BaseController {
+func (r *router) Controller(name string) coremodels.BaseController {
   route := r.Route(name)
   if route == nil {
     return nil
@@ -302,7 +302,7 @@ func (handler *Handler) Type() string {
   return handler.contenttype
 }
 
-func (handler *Handler) Href(baseUrl string, params map[string]string, encoder *models.ContentTypeUrlEncoding) string {
+func (handler *Handler) Href(baseUrl string, params map[string]string, encoder *coremodels.ContentTypeUrlEncoding) string {
   parsedUrl := handler.route.MatchUrl
   for key, value := range params {
     parsedUrl = strings.ReplaceAll(parsedUrl, ":" + key, value)
@@ -343,7 +343,7 @@ func findHandler(accept string, handlers map[string]*Handler) *Handler {
   return handlers[defaultContentType]
 }
 
-func buildAcceptValue(r *http.Request, contentTypeUrlEncoder *models.ContentTypeUrlEncoding) string {
+func buildAcceptValue(r *http.Request, contentTypeUrlEncoder *coremodels.ContentTypeUrlEncoding) string {
   acceptHeader := r.Header.Get("accept")
   if contentTypeUrlEncoder == nil {
     return acceptHeader

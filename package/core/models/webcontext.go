@@ -1,4 +1,4 @@
-package models
+package coremodels
 
 import(
   "net/http"

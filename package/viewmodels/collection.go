@@ -1,9 +1,13 @@
 package viewmodels
 
+import(
+  "oaf-server/package/core/viewmodels"
+)
+
 type Collection struct {
   /* indicator about the type of the items in the collection (the default value is 'feature').	*/
 	ItemType string `json:"itemType,omitempty"`
-	Links []*Link `json:"links"`
+	Links []*viewmodels.Link `json:"links"`
 	/* human readable title of the collection	*/
 	Title string `json:"title,omitempty"`
 	/* the list of coordinate reference systems supported by the service	*/

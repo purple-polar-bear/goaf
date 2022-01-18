@@ -4,10 +4,10 @@ import(
   "encoding/json"
   "fmt"
   "net/http"
-  "oaf-server/package/models"
+  "oaf-server/package/core/models"
 )
 
-func RenderPage(context *models.Webcontext, resource interface{}) {
+func RenderPage(context *coremodels.Webcontext, resource interface{}) {
   writer := context.W
   encodedContent, err := json.Marshal(resource)
   if err != nil {
@@ -24,7 +24,7 @@ func jsonError(w http.ResponseWriter, code string, msg string, status int) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)
 
-	result, err := json.Marshal(&models.Exception{
+	result, err := json.Marshal(&coremodels.Exception{
 		Code:        code,
 		Description: msg,
 	})

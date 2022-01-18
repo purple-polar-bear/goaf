@@ -1,4 +1,4 @@
-package apif
+package apicore
 
 import(
   "oaf-server/package/controllers"

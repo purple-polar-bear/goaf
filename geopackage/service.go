@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"oaf-server/core"
 	"oaf-server/package/features"
-	"oaf-server/package/core"
+	"oaf-server/package/core/services"
 
 	"github.com/go-spatial/geom"
 	"github.com/go-spatial/geom/encoding/geojson"
@@ -122,7 +122,7 @@ func (service *featureService) Feature(collectionId string, id string) *features
 	}
 }
 
-func (service *featureService) BuildOpenAPISpecification(builder apifcore.OpenAPIBuilder) {
+func (service *featureService) BuildOpenAPISpecification(builder coreservices.OpenAPIBuilder) {
 	builderService := features.NewFeatureServiceOpenAPIBuilder(builder)
 	builderService.AddBBox()
 	builderService.AddDatetime()

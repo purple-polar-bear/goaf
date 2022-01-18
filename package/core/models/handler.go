@@ -1,4 +1,4 @@
-package models
+package coremodels
 
 // A typeroute is a route with a given content type
 type Handler interface {

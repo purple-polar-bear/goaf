@@ -1,4 +1,4 @@
-package models
+package coremodels
 
 type Route interface {
   // Name of the route

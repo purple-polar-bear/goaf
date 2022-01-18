@@ -1,20 +1,20 @@
-package apifcontrollers
+package corecontrollers
 
 import(
   "net/http"
-  "oaf-server/package/core"
-  "oaf-server/package/models"
-  "oaf-server/package/viewmodels"
-  "oaf-server/package/templates/core"
+  "oaf-server/package/core/services"
+  "oaf-server/package/core/models"
+  "oaf-server/package/core/viewmodels"
+  "oaf-server/package/core/templates"
 )
 
 type LandingpageController struct {
 }
 
-func (controller *LandingpageController) HandleFunc(app models.Application, r interface{}) models.ControllerFunc {
+func (controller *LandingpageController) HandleFunc(app coremodels.Application, r interface{}) coremodels.ControllerFunc {
   renderer := r.(coretemplates.RenderCoreType)
 
-  return func(handler models.Handler, w http.ResponseWriter, r *http.Request, routeParameters models.MatchedRouteParameters) {
+  return func(handler coremodels.Handler, w http.ResponseWriter, r *http.Request, routeParameters coremodels.MatchedRouteParameters) {
     links := controller.buildLinks(handler, app)
     config := app.Config()
 
@@ -24,15 +24,15 @@ func (controller *LandingpageController) HandleFunc(app models.Application, r in
       Links: links,
     }
 
-    renderer.RenderLandingpage(models.NewWebcontext(w, r), resource)
+    renderer.RenderLandingpage(coremodels.NewWebcontext(w, r), resource)
   }
 }
 
-func (controller *LandingpageController) buildLinks(handler models.Handler, app models.Application) []*viewmodels.Link {
+func (controller *LandingpageController) buildLinks(handler coremodels.Handler, app coremodels.Application) []*viewmodels.Link {
   result := []*viewmodels.Link{}
   baseUrl := app.Config().FullUri()
   params := make(map[string]string)
-  coreservice, ok := app.GetService("core").(apifcore.CoreService)
+  coreservice, ok := app.GetService("core").(coreservices.CoreService)
   if !ok {
     panic("Cannot find coreservice")
   }
