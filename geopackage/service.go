@@ -4,7 +4,8 @@ import (
 	"log"
 	"net/http"
 	"oaf-server/core"
-	"oaf-server/package/features"
+	"oaf-server/package/features/models"
+	"oaf-server/package/features/services"
 	"oaf-server/package/core/services"
 
 	"github.com/go-spatial/geom"
@@ -17,7 +18,7 @@ type featureService struct {
 	config     *core.Config
 }
 
-func Init(config core.Config) features.FeatureService {
+func Init(config core.Config) featureservices.FeatureService {
 	f := &featureService{}
 
 	gp, err := NewGeoPackage(config.Datasource.Geopackage.File, config.Datasource.Geopackage.Fid)
@@ -56,9 +57,9 @@ func Init(config core.Config) features.FeatureService {
 	return f
 }
 
-func (service *featureService) Collections() []features.Collection {
+func (service *featureService) Collections() []featuremodels.Collection {
 
-	collections := []features.Collection{}
+	collections := []featuremodels.Collection{}
 
 	for _, c := range service.geopackage.Collections {
 		col := &collection{id: c.Tablename, title: c.Identifier, description: c.Description}
@@ -78,7 +79,7 @@ func (c *collection) Id() string         { return c.id }
 func (c *collection) Title() string      { return c.title }
 func (c collection) Description() string { return c.description }
 
-func (service *featureService) Collection(name string) features.Collection {
+func (service *featureService) Collection(name string) featuremodels.Collection {
 
 	for _, c := range service.geopackage.Collections {
 		if c.Identifier == name {
@@ -89,7 +90,7 @@ func (service *featureService) Collection(name string) features.Collection {
 	return nil
 }
 
-func (service *featureService) Features(r *http.Request, params *features.FeaturesParams) features.Features {
+func (service *featureService) Features(r *http.Request, params *featuremodels.FeaturesParams) featuremodels.Features {
 	cn, err := service.config.Datasource.Collections.GetCollections(params.CollectionId)
 	if err != nil {
 		log.Fatal(err)
@@ -108,22 +109,24 @@ func (service *featureService) Features(r *http.Request, params *features.Featur
 	return fcGeoJSON
 }
 
-func (service *featureService) Feature(collectionId string, id string) *features.Feature {
+func (service *featureService) Feature(collectionId string, id string) *featuremodels.Feature {
 	geometry := geom.Point{4.873270473933632, 53.083485031473046}
 	properties := make(map[string]interface{})
 	properties["component_addressareaname"] = "Oosterend"
 
-	return &features.Feature{
-		ID: id,
-		Feature: geojson.Feature{
-			Geometry:   geojson.Geometry{Geometry: geometry},
-			Properties: properties,
+	return &featuremodels.Feature{
+		Feature: core.Feature{
+			ID: id,
+			Feature: geojson.Feature{
+				Geometry:   geojson.Geometry{Geometry: geometry},
+				Properties: properties,
+			},
 		},
 	}
 }
 
 func (service *featureService) BuildOpenAPISpecification(builder coreservices.OpenAPIBuilder) {
-	builderService := features.NewFeatureServiceOpenAPIBuilder(builder)
+	builderService := featureservices.NewFeatureServiceOpenAPIBuilder(builder)
 	builderService.AddBBox()
 	builderService.AddDatetime()
   builderService.AddLimit()

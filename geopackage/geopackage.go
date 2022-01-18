@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"log"
 	"oaf-server/core"
-	"oaf-server/package/features"
+	"oaf-server/package/features/models"
 	"os"
 	"regexp"
 	"time"
@@ -164,9 +164,9 @@ func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result
 }
 
 // GetFeatures return the FeatureCollection
-func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection core.Collection, featureParams *features.FeaturesParams, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *features.FeatureCollection, err error) {
+func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection core.Collection, featureParams *featuremodels.FeaturesParams, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *featuremodels.FeatureCollection, err error) {
 	// Features bit of a hack // layer.Features => tablename, PK, ...FEATURES, assuming create table in sql statement first is PK
-	result = &features.FeatureCollection{
+	result = &featuremodels.FeatureCollection{
 		RequestParams: featureParams,
 	}
 	if len(bbox) > 4 {
@@ -226,7 +226,7 @@ func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, colle
 
 	result.NumberReturned = 0
 	result.Type = "FeatureCollection"
-	result.Features = make([]*features.Feature, 0)
+	result.Features = make([]*featuremodels.Feature, 0)
 
 	for rows.Next() {
 		if err = ctx.Err(); err != nil {
@@ -246,7 +246,8 @@ func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, colle
 			return
 		}
 
-		feature := &features.Feature{Feature: geojson.Feature{Properties: make(map[string]interface{})}}
+		actualFeature := core.Feature{Feature: geojson.Feature{Properties: make(map[string]interface{})}}
+		feature := &featuremodels.Feature{Feature: actualFeature}
 
 		for i, colName := range cols {
 			// check if the context cancelled or timed out
@@ -267,9 +268,9 @@ func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, colle
 				}
 				switch identifier := ID.(type) {
 				case uint64:
-					feature.ID = identifier
+					actualFeature.ID = &identifier
 				case string:
-					feature.ID = identifier
+					actualFeature.ID = &identifier
 				}
 
 			case collection.Columns.Geometry:
@@ -284,7 +285,7 @@ func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, colle
 				if err != nil {
 					return result, err
 				}
-				feature.Geometry = geojson.Geometry{Geometry: geo.Geometry}
+				actualFeature.Geometry = geojson.Geometry{Geometry: geo.Geometry}
 
 			case "minx", "miny", "maxx", "maxy", "min_zoom", "max_zoom":
 				// Skip these columns used for bounding box and zoom filtering
@@ -298,17 +299,17 @@ func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, colle
 					for j := 0; j < len(v); j++ {
 						asBytes[j] = v[j]
 					}
-					feature.Properties[colName] = string(asBytes)
+					actualFeature.Properties[colName] = string(asBytes)
 				case int64:
-					feature.Properties[colName] = v
+					actualFeature.Properties[colName] = v
 				case float64:
-					feature.Properties[colName] = v
+					actualFeature.Properties[colName] = v
 				case time.Time:
-					feature.Properties[colName] = v
+					actualFeature.Properties[colName] = v
 				case string:
-					feature.Properties[colName] = v
+					actualFeature.Properties[colName] = v
 				case bool:
-					feature.Properties[colName] = v
+					actualFeature.Properties[colName] = v
 				default:
 					log.Printf("unexpected type for sqlite column data: %v: %T", cols[i], v)
 				}

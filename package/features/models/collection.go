@@ -1,4 +1,4 @@
-package features
+package featuremodels
 
 type Collection interface {
   Id() string

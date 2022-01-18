@@ -8,8 +8,6 @@ import(
   "oaf-server/package/core/services"
   "oaf-server/package/core/models"
   "oaf-server/package/core/controllers"
-  "oaf-server/package/controllers"
-  "oaf-server/package/features"
 )
 
 // A controller for resolving the OGC Api Feature calls
@@ -41,6 +39,12 @@ type Engine interface {
 
   // Returns a service
   GetService(string) interface{}
+
+  // Adds a class to the conformance list
+  AddConformanceClass(string)
+
+  // Adds a route to the list of routes
+  AddRoute(*Routedef)
 
   // Returns all the services
   RebuildOpenAPI()
@@ -116,38 +120,6 @@ func NewSimpleEngine(mountingpath string) *engine {
   engine.AddService("core", service)
 
   return engine
-}
-
-func EnableFeatures(engine *engine, service features.FeatureService) {
-  engine.AddConformanceClass("http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/features")
-
-  collectionsController := &apifcontrollers.CollectionsController{}
-  engine.AddRoute(&Routedef{
-    Name: "featurecollections",
-    Path: "collections",
-    Controller: collectionsController,
-    LandingpageVisible: true,
-  })
-  collectionController := &apifcontrollers.CollectionController{}
-  engine.AddRoute(&Routedef{
-    Name: "featurecollection",
-    Path: "collections/:collection_id",
-    Controller: collectionController,
-  })
-  featuresController := &apifcontrollers.FeaturesController{}
-  engine.AddRoute(&Routedef{
-    Name: "features",
-    Path: "collections/:collection_id/items",
-    Controller: featuresController,
-  })
-  featureController := &apifcontrollers.FeatureController{}
-  engine.AddRoute(&Routedef{
-    Name: "feature",
-    Path: "collections/:collection_id/items/:item_id",
-    Controller: featureController,
-  })
-
-  engine.AddService("features", service)
 }
 
 func EnableAPISpecification(engine *engine) {

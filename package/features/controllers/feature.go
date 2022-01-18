@@ -1,4 +1,4 @@
-package apifcontrollers
+package featurescontrollers
 
 import(
   "net/http"
@@ -6,9 +6,9 @@ import(
   "oaf-server/package/core/services"
   "oaf-server/package/core/models"
   coreviewmodels "oaf-server/package/core/viewmodels"
-  "oaf-server/package/features"
-  "oaf-server/package/viewmodels"
-  "oaf-server/package/templates/core"
+  "oaf-server/package/features/models"
+  "oaf-server/package/features/services"
+  "oaf-server/package/features/templates/core"
 
   // "github.com/go-spatial/geom/encoding/geojson"
 )
@@ -23,7 +23,7 @@ func (controller *FeatureController) HandleFunc(app coremodels.Application, r in
   return func(handler coremodels.Handler, w http.ResponseWriter, r *http.Request, routeParameters coremodels.MatchedRouteParameters) {
     templates := app.Templates("feature", "")
 
-    featureService, ok := app.GetService("features").(features.FeatureService)
+    featureService, ok := app.GetService("features").(featureservices.FeatureService)
     if !ok {
       panic("Cannot find featureservice")
     }
@@ -55,7 +55,7 @@ func (controller *FeatureController) HandleFunc(app coremodels.Application, r in
   		links = append(links, link)
   	}
 
-    resource := &viewmodels.Feature{
+    resource := &featuremodels.Feature{
       Feature: feature,
       Links: links,
     }

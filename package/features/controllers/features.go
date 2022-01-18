@@ -1,4 +1,4 @@
-package apifcontrollers
+package featurescontrollers
 
 import (
 	"net/http"
@@ -8,9 +8,10 @@ import (
 	"oaf-server/package/core/services"
 	"oaf-server/package/core/models"
 	coreviewmodels "oaf-server/package/core/viewmodels"
-	"oaf-server/package/features"
-	"oaf-server/package/templates/core"
-	"oaf-server/package/viewmodels"
+	"oaf-server/package/features/models"
+	"oaf-server/package/features/services"
+	"oaf-server/package/features/templates/core"
+	"oaf-server/package/features/viewmodels"
 )
 
 type FeaturesController struct {
@@ -24,7 +25,7 @@ func (controller *FeaturesController) HandleFunc(app coremodels.Application, r i
 		r.ParseForm()
 		urlValues := r.Form
 
-    featureService, ok := app.GetService("features").(features.FeatureService)
+    featureService, ok := app.GetService("features").(featureservices.FeatureService)
     if !ok {
       panic("Cannot find featureservice")
     }
@@ -53,15 +54,15 @@ func (controller *FeaturesController) HandleFunc(app coremodels.Application, r i
   }
 }
 
-func buildFeatureParams(app coremodels.Application, routeParameters coremodels.MatchedRouteParameters, urlValues url.Values) *features.FeaturesParams {
-  params := features.NewFeaturesParams()
+func buildFeatureParams(app coremodels.Application, routeParameters coremodels.MatchedRouteParameters, urlValues url.Values) *featuremodels.FeaturesParams {
+  params := featuremodels.NewFeaturesParams()
   params.CollectionId = routeParameters.Get("collection_id")
 	params.Offset = ConvertStringToIntegerWithDefault(urlValues.Get("offset"), 0)
 	params.Limit = ConvertStringToIntegerWithDefault(urlValues.Get("limit"), 100)
   return params
 }
 
-func BuildFeaturesLinks(handler coremodels.Handler, app coremodels.Application, encoding *coremodels.ContentTypeUrlEncoding, templates []coremodels.Handler, params *features.FeaturesParams, features features.Features, featureParams *features.FeaturesParams) []*coreviewmodels.Link {
+func BuildFeaturesLinks(handler coremodels.Handler, app coremodels.Application, encoding *coremodels.ContentTypeUrlEncoding, templates []coremodels.Handler, params *featuremodels.FeaturesParams, features featuremodels.Features, featureParams *featuremodels.FeaturesParams) []*coreviewmodels.Link {
 	baseUrl := app.Config().FullUri()
 	hrefParams := make(map[string]string)
   hrefParams["collection_id"] = featureParams.CollectionId

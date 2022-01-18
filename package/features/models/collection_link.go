@@ -1,4 +1,4 @@
-package features
+package featuremodels
 
 type CollectionLink interface {
   Href() string

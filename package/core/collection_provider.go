@@ -1,7 +1,8 @@
 package apicore
 
+/*
 import(
-  "oaf-server/package/controllers"
+  "oaf-server/package/core/controllers"
 )
 
 type CollectionProvider interface {
@@ -15,8 +16,8 @@ type CollectionInfo struct {
 }
 
 type FeatureApplication struct {
-  CollectionsController apifcontrollers.CollectionsController
-  CollectionController apifcontrollers.CollectionController
+  CollectionsController corecontrollers.CollectionsController
+  CollectionController corecontrollers.CollectionController
 
   providers []CollectionProvider
 }
@@ -44,3 +45,4 @@ func (app *FeatureApplication) Get(name string) *CollectionInfo {
 
   return nil
 }
+*/

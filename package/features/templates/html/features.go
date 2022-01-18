@@ -4,7 +4,8 @@ import(
   "html/template"
   "oaf-server/package/core/models"
   "oaf-server/package/core/templates/html"
-  "oaf-server/package/viewmodels"
+  "oaf-server/package/features/models"
+  "oaf-server/package/features/viewmodels"
 )
 
 // Transforms a renderlandingpage function into a renderlandingpage object
@@ -38,6 +39,6 @@ func (renderer *FeatureRenderer) RenderItems(context *coremodels.Webcontext, ite
   renderer.Templates.ExecuteTemplate(context.W, "features.html", items)
 }
 
-func (renderer *FeatureRenderer) RenderItem(context *coremodels.Webcontext, item *viewmodels.Feature) {
+func (renderer *FeatureRenderer) RenderItem(context *coremodels.Webcontext, item *featuremodels.Feature) {
   renderer.Templates.ExecuteTemplate(context.W, "feature.html", item)
 }

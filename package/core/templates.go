@@ -4,8 +4,6 @@ import(
   "oaf-server/package/core/models"
   "oaf-server/package/core/templates/json"
   "oaf-server/package/core/templates/html"
-  featuresjsontemplates "oaf-server/package/templates/json"
-  featureshtmltemplates "oaf-server/package/templates/html"
 )
 
 type Templates struct {
@@ -33,23 +31,6 @@ func AddBaseHTMLTemplates(engine Engine) {
   engine.AddTemplate("landingpage", "alternate landing page in html format", "text/html", "self", renderer)
   engine.AddTemplate("conformance", "conformance capabilities in html format", "text/html", "conformance", renderer)
   engine.AddTemplate("api", "API capabilities in html format", "text/html", "service-doc", renderer)
-}
-
-// Shortcut functions to add JSON responses to all endpoints
-func AddFeaturesJSONTemplates(engine Engine) {
-  renderer := featuresjsontemplates.NewFeatureRenderer()
-  engine.AddTemplate("featurecollections", "data collections in json format", "application/json", "data", renderer)
-  engine.AddTemplate("featurecollection", "data collection in json format", "application/json", "data", renderer)
-  engine.AddTemplate("features", "data items in json format", "application/json", "data", renderer)
-  engine.AddTemplate("feature", "data item in json format", "application/json", "data", renderer)
-}
-
-func AddFeaturesHTMLTemplates(engine Engine) {
-  renderer := featureshtmltemplates.NewFeatureRenderer()
-  engine.AddTemplate("featurecollections", "data collections in html format", "text/html", "data", renderer)
-  engine.AddTemplate("featurecollection", "data collection in html format", "text/html", "data", renderer)
-  engine.AddTemplate("features", "data items in html format", "text/html", "data", renderer)
-  engine.AddTemplate("feature", "data item in html format", "text/html", "data", renderer)
 }
 
 // Add a template to the engine

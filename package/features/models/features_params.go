@@ -1,4 +1,4 @@
-package features
+package featuremodels
 
 type FeaturesParams struct {
   CollectionId string

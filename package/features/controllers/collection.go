@@ -1,12 +1,12 @@
-package apifcontrollers
+package featurescontrollers
 
 import(
   "net/http"
 
   "oaf-server/package/core/services"
-	"oaf-server/package/features"
   "oaf-server/package/core/models"
-	coretemplates "oaf-server/package/templates/core"
+  "oaf-server/package/features/services"
+  "oaf-server/package/features/templates/core"
 )
 
 type CollectionController struct {
@@ -18,7 +18,7 @@ func (controller *CollectionController) HandleFunc(app coremodels.Application, r
   return func(handler coremodels.Handler, w http.ResponseWriter, r *http.Request, routeParameters coremodels.MatchedRouteParameters) {
     name := routeParameters.Get("collection_id")
 
-    featureService, ok := app.GetService("features").(features.FeatureService)
+    featureService, ok := app.GetService("features").(featureservices.FeatureService)
     if !ok {
       panic("Cannot find featureservice")
     }

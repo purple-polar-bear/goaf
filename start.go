@@ -10,6 +10,7 @@ import (
 	"oaf-server/package/core"
 	"oaf-server/package/core/models"
 	"oaf-server/package/core/services"
+	"oaf-server/package/features"
 
 	// ogcapi "oaf-server/package"
 	// ogcapifeatures "oaf-server/package/features"
@@ -181,9 +182,9 @@ func addPackageHandler(router *server.RegexpHandler, dsrc *core.Config) {
 	apiService.SetContentTypeUrlEncoder(ctUrlEncoder)
 
 	featuredatasource := geopackage.Init(*dsrc)
-	apicore.EnableFeatures(engine, featuredatasource)
-	apicore.AddFeaturesJSONTemplates(engine)
-	apicore.AddFeaturesHTMLTemplates(engine)
+	apifeatures.EnableFeatures(engine, featuredatasource)
+	apifeatures.AddFeaturesJSONTemplates(engine)
+	apifeatures.AddFeaturesHTMLTemplates(engine)
 
 	engine.RebuildOpenAPI()
 	// router.HandleFunc(regexp.MustCompile("^"+mountingPath), engine.HTTPHandler)

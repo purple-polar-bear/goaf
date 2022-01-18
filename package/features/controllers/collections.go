@@ -1,4 +1,4 @@
-package apifcontrollers
+package featurescontrollers
 
 import(
   "net/http"
@@ -6,9 +6,10 @@ import(
   "oaf-server/package/core/services"
   "oaf-server/package/core/models"
   coreviewmodels "oaf-server/package/core/viewmodels"
-  "oaf-server/package/features"
-  "oaf-server/package/viewmodels"
-  "oaf-server/package/templates/core"
+  "oaf-server/package/features/models"
+  "oaf-server/package/features/services"
+  "oaf-server/package/features/viewmodels"
+  "oaf-server/package/features/templates/core"
 )
 
 type CollectionsController struct {
@@ -19,7 +20,7 @@ func (controller *CollectionsController) HandleFunc(app coremodels.Application, 
   renderer := r.(coretemplates.RenderFeaturesType)
 
   return func(handler coremodels.Handler, w http.ResponseWriter, r *http.Request, routeParameters coremodels.MatchedRouteParameters) {
-    featureService, ok := app.GetService("features").(features.FeatureService)
+    featureService, ok := app.GetService("features").(featureservices.FeatureService)
     if !ok {
       panic("Cannot find featureservice")
     }
@@ -48,7 +49,7 @@ func (controller *CollectionsController) HandleFunc(app coremodels.Application, 
   }
 }
 
-func BuildCollection(handler coremodels.Handler, app coremodels.Application, encoding *coremodels.ContentTypeUrlEncoding, collection features.Collection, templates []coremodels.Handler) *viewmodels.Collection {
+func BuildCollection(handler coremodels.Handler, app coremodels.Application, encoding *coremodels.ContentTypeUrlEncoding, collection featuremodels.Collection, templates []coremodels.Handler) *viewmodels.Collection {
   return &viewmodels.Collection{
     Id: collection.Id(),
     Title: collection.Title(),
@@ -76,7 +77,7 @@ func AddCollectionsLinkList(handler coremodels.Handler, app coremodels.Applicati
   return links
 }
 
-func AddCollectionLinkList(handler coremodels.Handler, links []*coreviewmodels.Link, app coremodels.Application, encoding *coremodels.ContentTypeUrlEncoding, collection features.Collection, templates []coremodels.Handler) []*coreviewmodels.Link {
+func AddCollectionLinkList(handler coremodels.Handler, links []*coreviewmodels.Link, app coremodels.Application, encoding *coremodels.ContentTypeUrlEncoding, collection featuremodels.Collection, templates []coremodels.Handler) []*coreviewmodels.Link {
   baseUrl := app.Config().FullUri()
   params := make(map[string]string)
   params["collection_id"] = collection.Id()

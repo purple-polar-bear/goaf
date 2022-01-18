@@ -1,9 +1,10 @@
-package features
+package apifeatures
 
 import (
-	"github.com/go-spatial/geom/encoding/geojson"
+//	"github.com/go-spatial/geom/encoding/geojson"
 )
 
+/*
 type Feature struct {
   // overwrite ID in geojson.Feature so strings are also allowed as id
   ID interface{} `json:"id,omitempty"`
@@ -20,3 +21,4 @@ type Link struct {
   Title    string `json:"title,omitempty"`
   Type     string `json:"type,omitempty"`
 }
+*/

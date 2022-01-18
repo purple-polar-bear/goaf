@@ -1,7 +1,8 @@
 package core
 
 import (
-	"oaf-server/package/features"
+	"oaf-server/package/core/viewmodels"
+	"oaf-server/package/features/models"
 
 	"github.com/go-spatial/geom/encoding/geojson"
 )
@@ -11,12 +12,12 @@ type FeatureCollection struct {
 	TimeStamp      string          `json:"timeStamp,omitempty"`
 	Type           string          `json:"type"`
 	Features       []*Feature      `json:"features"`
-	Links          []features.Link `json:"links,omitempty"`
+	Links          []*viewmodels.Link `json:"links,omitempty"`
 	NumberMatched  int64           `json:"numberMatched,omitempty"`
 	Crs            string          `json:"crs,omitempty"`
 	Offset         int64           `json:"-"`
 	Next           bool
-	RequestParams  *features.FeaturesParams
+	RequestParams  *featuremodels.FeaturesParams
 }
 
 type Feature struct {
@@ -24,7 +25,7 @@ type Feature struct {
 	ID interface{} `json:"id,omitempty"`
 	geojson.Feature
 	// Added Links in de document
-	Links []features.Link `json:"links,omitempty"`
+	Links []*viewmodels.Link `json:"links,omitempty"`
 }
 
 func (features *FeatureCollection) HasNext() bool {

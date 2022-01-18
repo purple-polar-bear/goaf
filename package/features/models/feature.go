@@ -1,4 +1,4 @@
-package viewmodels
+package featuremodels
 
 import (
 	"encoding/json"

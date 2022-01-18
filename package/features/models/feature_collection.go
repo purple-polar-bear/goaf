@@ -1,20 +1,16 @@
-package features
+package featuremodels
 
-type Features interface {
-  HasNext() bool
-  NextLimit() int
-  NextOffset() int
-  Items() []*Feature
-}
+import(
+  "oaf-server/package/core/viewmodels"
+)
 
-// Implementation
 type FeatureCollection struct {
   RequestParams  *FeaturesParams
   Next           bool
   Features       []*Feature
   NumberReturned int64
   Type           string
-  Links          []Link
+  Links          []*viewmodels.Link
   NumberMatched  int64
   Crs            string
 }

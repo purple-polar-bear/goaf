@@ -1,18 +1,9 @@
-package features
+package featureservices
 
 import (
-  "net/http"
   "oaf-server/package/core/services"
   "github.com/getkin/kin-openapi/openapi3"
 )
-
-type FeatureService interface {
-  Collections() []Collection
-  Collection(string) Collection
-  Features(*http.Request, *FeaturesParams) Features
-  Feature(string, string) *Feature
-  BuildOpenAPISpecification(builder coreservices.OpenAPIBuilder)
-}
 
 type FeatureServiceOpenAPIBuilder interface {
   AddBBox()
