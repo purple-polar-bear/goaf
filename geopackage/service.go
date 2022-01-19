@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 	"oaf-server/core"
-	"oaf-server/package/features/models"
-	"oaf-server/package/features/services"
-	"oaf-server/package/core/services"
+	"github.com/purple-polar-bear/go-ogc-api/features/models"
+	"github.com/purple-polar-bear/go-ogc-api/features/services"
+	"github.com/purple-polar-bear/go-ogc-api/core/services"
 
 	"github.com/go-spatial/geom"
 	"github.com/go-spatial/geom/encoding/geojson"

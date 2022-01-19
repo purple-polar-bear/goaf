@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"oaf-server/codegen"
 	"oaf-server/core"
-	"oaf-server/package/features/models"
+	"github.com/purple-polar-bear/go-ogc-api/features/models"
 )
 
 // GetFeaturesProvider is returned by the NewGetFeaturesProvider

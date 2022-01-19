@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"oaf-server/codegen"
-	"oaf-server/package/core/viewmodels"
+	"github.com/purple-polar-bear/go-ogc-api/core/viewmodels"
 	"strconv"
 	"strings"
 

@@ -8,8 +8,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gdey/errors v0.0.0-20190426172550-8ebd5bc891fb h1:FYO+lZtAUnakgSW9xYs7QvgawjCDM5wgHaXoDhYHNH4=
 github.com/gdey/errors v0.0.0-20190426172550-8ebd5bc891fb/go.mod h1:PFaV7MgSRe92Wo9O2H2i1CIm7urUk10AgdSHKyBfjmQ=
-github.com/getkin/kin-openapi v0.63.0 h1:27zYoKAuHDSquDYRpfmgsDu9TKC5z5G4vlu/XmIdsa8=
-github.com/getkin/kin-openapi v0.63.0/go.mod h1:7Yn5whZr5kJi6t+kShccXS8ae1APpYTW6yheSwk8Yi4=
+github.com/getkin/kin-openapi v0.88.0 h1:BjJ2JERWJbYE1o1RGEj/5LmR5qw7ecfl3O3su4ImR+0=
+github.com/getkin/kin-openapi v0.88.0/go.mod h1:660oXbgy5JFMKreazJaQTw7o+X00qeSyhcnluiMv+Xg=
 github.com/ghodss/yaml v1.0.0 h1:wQHKEahhL6wmXdzwWG11gIVCkOv05bNOh+Rxn0yngAk=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/go-openapi/jsonpointer v0.19.5 h1:gZr+CIYByUqjcgeLXnQu2gHYQC9o73G2XUeOFYEICuY=
@@ -55,6 +55,10 @@ github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLA
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/purple-polar-bear/go-ogc-api v0.0.0-20220119192756-1d838c7a6a2c h1:e522wW1BpMN4H1XRKVmFeumMDknDbHPhBIppgNkc3Zk=
+github.com/purple-polar-bear/go-ogc-api v0.0.0-20220119192756-1d838c7a6a2c/go.mod h1:OteruhHFlRr2BtsIhcgZMGf9BWV1ZdEYvtT4lmSJ4ac=
+github.com/purple-polar-bear/go-ogc-api v0.0.1 h1:5NOK7L7hYN7LhlQPTO0ptUohy6Mmhew8xgmEjqr1Y4w=
+github.com/purple-polar-bear/go-ogc-api v0.0.1/go.mod h1:U2Ll1LpAMIxEqNSjZkX+H0782Ex2nsJmUqyD1viPNI8=
 github.com/rs/cors v1.7.0 h1:+88SsELBHx5r+hZ8TCkggzSstaWNbDvThkVK8H6f9ik=
 github.com/rs/cors v1.7.0/go.mod h1:gFx+x8UowdsKA9AchylcLynDq+nNFfI8FkUZdN/jGCU=
 github.com/russross/blackfriday/v2 v2.0.1 h1:lPqVAte+HuHNfhJ/0LC98ESWRz8afy9tM/0RK8m9o+Q=

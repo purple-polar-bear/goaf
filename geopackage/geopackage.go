@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"log"
 	"oaf-server/core"
-	"oaf-server/package/features/models"
+	"github.com/purple-polar-bear/go-ogc-api/features/models"
 	"os"
 	"regexp"
 	"time"
