@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"oaf-server/package/core/services"
 	"oaf-server/package/core/models"
@@ -117,5 +118,10 @@ func ConvertStringToIntegerWithDefault(value string, defaultValue int) int {
 }
 
 func BuildFeaturesUrl(baseUrl string, limit int, offset int) string {
-	return baseUrl + "?" + "offset=" + strconv.Itoa(limit) + "&limit=" + strconv.Itoa(offset)
+	hasQuery := strings.Contains(baseUrl, "?")
+	delimiter := "?"
+	if hasQuery {
+		delimiter = "&"
+	}
+	return baseUrl + delimiter + "offset=" + strconv.Itoa(limit) + "&limit=" + strconv.Itoa(offset)
 }

@@ -80,7 +80,7 @@ func (service *coreService) OpenAPI() *openapi3.T {
 }
 
 func (service *coreService) RebuildOpenAPI(services []interface{})() {
-  builder := NewOpenAPIBuilder(service.basicOpenAPI, service.loader)
+  builder := NewOpenAPIBuilder(service.basicOpenAPI, service.loader, service.config)
   service.openAPI = builder.Build(services)
 }
 

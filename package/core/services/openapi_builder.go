@@ -3,6 +3,8 @@ package coreservices
 import(
   "fmt"
 
+  "oaf-server/package/core/models"
+
   "github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -13,15 +15,24 @@ type OpenAPIBuilder interface {
 }
 
 type openAPIBuilder struct {
+  // OpenAPI loader object
   Loader *openapi3.Loader
+
+  // Base template used for quick building of the final template
   BaseTemplate *openapi3.T
+
+  // Server configuration
+  Config coremodels.Serverconfig
+
+  // Result template
   T *openapi3.T
 }
 
-func NewOpenAPIBuilder(basetemplate *openapi3.T, loader *openapi3.Loader) OpenAPIBuilder {
+func NewOpenAPIBuilder(basetemplate *openapi3.T, loader *openapi3.Loader, config coremodels.Serverconfig) OpenAPIBuilder {
   return &openAPIBuilder{
     BaseTemplate: basetemplate,
     Loader: loader,
+    Config: config,
   }
 }
 
@@ -36,6 +47,14 @@ func (builder *openAPIBuilder) AddComponentParameter(parameterName string, param
 
 func (builder *openAPIBuilder) Build(services []interface{}) *openapi3.T {
   builder.duplicateTemplate()
+  // Change the paths
+  replacedPaths := make(map[string]*openapi3.PathItem)
+  for path, item := range builder.T.Paths {
+    replacedPaths[builder.Config.Mountingpath() + path] = item
+  }
+  builder.T.Paths = replacedPaths
+
+  // Iterate through all the services in order to add specifications
   for _, service := range services {
     openapiservice := service.(OpenAPIService)
     openapiservice.BuildOpenAPISpecification(builder)

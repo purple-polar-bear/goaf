@@ -14,14 +14,19 @@ type Router interface {
   // Handler for requests
   HandleRequest(coreservice coreservices.CoreService, w http.ResponseWriter, request *http.Request)
 
+  // Adds a route to the list of routes
   AddRoute(routedefinition *Routedef)
 
+  // Returns a route by name
   Route(name string) *Route
 
+  // Returns an array with all the routes
   Routes() []coremodels.Route
+
+  // Returns a controller
   Controller(name string) coremodels.BaseController
-  // Controllers() [string]coremodels.BaseController
-  //
+
+  // Returns all the handlers
   Handlers() []*Handler
 }
 
@@ -303,7 +308,9 @@ func (handler *Handler) Type() string {
 }
 
 func (handler *Handler) Href(baseUrl string, params map[string]string, encoder *coremodels.ContentTypeUrlEncoding) string {
+  // start with the URL that matched the route
   parsedUrl := handler.route.MatchUrl
+  // replace the wildcards with the actual values from the params map
   for key, value := range params {
     parsedUrl = strings.ReplaceAll(parsedUrl, ":" + key, value)
   }

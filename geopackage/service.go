@@ -102,6 +102,7 @@ func (service *featureService) Features(r *http.Request, params *featuremodels.F
 	bboxParam := params.Bbox
 
 	fcGeoJSON, err := service.geopackage.GetFeatures(r.Context(), service.geopackage.DB, cn, params, collectionId, offsetParam, limitParam, nil, bboxParam)
+
 	if err != nil {
 		log.Fatal("FeatureColletion error: ", err)
 	}

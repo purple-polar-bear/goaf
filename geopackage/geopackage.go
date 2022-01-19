@@ -246,7 +246,7 @@ func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, colle
 			return
 		}
 
-		actualFeature := core.Feature{Feature: geojson.Feature{Properties: make(map[string]interface{})}}
+		actualFeature := &core.Feature{Feature: geojson.Feature{Properties: make(map[string]interface{})}}
 		feature := &featuremodels.Feature{Feature: actualFeature}
 
 		for i, colName := range cols {

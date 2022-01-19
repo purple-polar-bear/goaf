@@ -10,7 +10,7 @@ import(
 
 // Transforms a renderlandingpage function into a renderlandingpage object
 func NewFeatureRenderer() *FeatureRenderer {
-  templates := htmltemplates.NewTemplate([]string{
+  templates := htmltemplates.NewTemplate("features", []string{
     "collections.html",
     "collection.html",
     "features.html",

@@ -793,7 +793,7 @@ components:
       format: date-time
       type: string
 paths:
-  '/package':
+  '/':
     get:
       tags:
         - Capabilities
@@ -808,7 +808,7 @@ paths:
           $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/LandingPage'
         '500':
           $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError'
-  '/package/conformance':
+  '/conformance':
     get:
       tags:
         - Capabilities

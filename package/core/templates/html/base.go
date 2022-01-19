@@ -5,8 +5,8 @@ import(
   "strings"
 )
 
-func NewTemplate(pages []string) *template.Template {
-  path := "package/templates/html/templates/"
+func NewTemplate(klass string, pages []string) *template.Template {
+  path := "package/" + klass + "/templates/html/templates/"
   pagesWithPath := []string{}
   for _, page := range pages {
     pagesWithPath = append(pagesWithPath, path + page)

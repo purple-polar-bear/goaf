@@ -187,5 +187,5 @@ func addPackageHandler(router *server.RegexpHandler, dsrc *core.Config) {
 	apifeatures.AddFeaturesHTMLTemplates(engine)
 
 	engine.RebuildOpenAPI()
-	// router.HandleFunc(regexp.MustCompile("^"+mountingPath), engine.HTTPHandler)
+	router.HandleFunc(regexp.MustCompile("^"+mountingPath), engine.HTTPHandler)
 }

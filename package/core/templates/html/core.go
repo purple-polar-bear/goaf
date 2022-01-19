@@ -8,7 +8,7 @@ import(
 
 // Transforms a renderlandingpage function into a renderlandingpage object
 func NewCoreRenderer() *CoreRenderer {
-  templates := NewTemplate([]string{
+  templates := NewTemplate("core", []string{
     "conformance.html",
     "landingpage.html",
     "api.html",

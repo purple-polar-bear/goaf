@@ -30,6 +30,7 @@ type Serverconfig interface {
   Port() int
 
   // Mounting path on which clients can access the server.
+  // Example: /endpoint
   Mountingpath() string
 
   // Returns the full host, including protocol and port, eg:
