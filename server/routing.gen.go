@@ -4,6 +4,7 @@ package server
 // DO NOT EDIT BY HAND!
 import (
 	"net/http"
+	"net/url"
 	"regexp"
 	"sort"
 )
@@ -30,6 +31,10 @@ func (h *RegexpHandler) HandleFunc(pattern *regexp.Regexp, handler func(http.Res
 }
 
 func (h *RegexpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.URL.String() == "" {
+		r.URL, _ = url.Parse("/")
+	}
+
 	for _, route := range h.Routes {
 		if route.pattern.MatchString(r.URL.Path) {
 			route.handler.ServeHTTP(w, r)
@@ -54,16 +59,16 @@ func (s *Server) Router() *RegexpHandler {
 	router := &RegexpHandler{}
 	router.HandleFunc(regexp.MustCompile("/api"), s.HandleForProvider(s.Providers.NewGetApiProvider))
 	// path: /
-	router.HandleFunc(regexp.MustCompile("/"), s.HandleForProvider(s.Providers.NewGetLandingPageProvider))
+	router.HandleFunc(regexp.MustCompile("^/"), s.HandleForProvider(s.Providers.NewGetLandingPageProvider))
 	// path: /collections
-	router.HandleFunc(regexp.MustCompile("/collections"), s.HandleForProvider(s.Providers.NewGetCollectionsProvider))
+	router.HandleFunc(regexp.MustCompile("^/collections"), s.HandleForProvider(s.Providers.NewGetCollectionsProvider))
 	// path: /collections/{collectionId}
-	router.HandleFunc(regexp.MustCompile("/collections/.*"), s.HandleForProvider(s.Providers.NewDescribeCollectionProvider))
+	router.HandleFunc(regexp.MustCompile("^/collections/.*"), s.HandleForProvider(s.Providers.NewDescribeCollectionProvider))
 	// path: /collections/{collectionId}/items
-	router.HandleFunc(regexp.MustCompile("/collections/.*/items"), s.HandleForProvider(s.Providers.NewGetFeaturesProvider))
+	router.HandleFunc(regexp.MustCompile("^/collections/.*/items"), s.HandleForProvider(s.Providers.NewGetFeaturesProvider))
 	// path: /collections/{collectionId}/items/{featureId}
-	router.HandleFunc(regexp.MustCompile("/collections/.*/items/.*"), s.HandleForProvider(s.Providers.NewGetFeatureProvider))
+	router.HandleFunc(regexp.MustCompile("^/collections/.*/items/.*"), s.HandleForProvider(s.Providers.NewGetFeatureProvider))
 	// path: /conformance
-	router.HandleFunc(regexp.MustCompile("/conformance"), s.HandleForProvider(s.Providers.NewGetConformanceDeclarationProvider))
+	router.HandleFunc(regexp.MustCompile("^/conformance"), s.HandleForProvider(s.Providers.NewGetConformanceDeclarationProvider))
 	return router
 }

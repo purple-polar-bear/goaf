@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"io/ioutil"
 	"log"
 	"oaf-server/codegen"
@@ -66,11 +67,24 @@ type Service struct {
 
 // Datasource wrappes the datasources, collections, dataset boundingbox and SRID
 type Datasource struct {
-	Geopackage  *Geopackage  `yaml:"gpkg"`
-	PostGIS     *PostGIS     `yaml:"postgis"`
-	Collections []Collection `yaml:"collections"`
-	BBox        [4]float64   `yaml:"bbox"`
-	Srid        int          `yaml:"srid"`
+	Geopackage  *Geopackage `yaml:"gpkg"`
+	PostGIS     *PostGIS    `yaml:"postgis"`
+	Collections Collections `yaml:"collections"`
+	BBox        [4]float64  `yaml:"bbox"`
+	Srid        int         `yaml:"srid"`
+}
+
+type Collections []Collection
+
+func (collections Collections) GetCollections(identifier string) (Collection, error) {
+
+	for _, collection := range collections {
+		if collection.Identifier == identifier {
+			return collection, nil
+		}
+	}
+
+	return Collection{}, errors.New("Collection not found")
 }
 
 // Geopackage contains the Geopackage file locations and a alternative Fid column

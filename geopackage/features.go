@@ -6,12 +6,13 @@ import (
 	"net/http"
 	"oaf-server/codegen"
 	"oaf-server/core"
+	"github.com/purple-polar-bear/go-ogc-api/features/models"
 )
 
 // GetFeaturesProvider is returned by the NewGetFeaturesProvider
 // containing the data, srsid and contenttype for the response
 type GetFeaturesProvider struct {
-	data        core.FeatureCollection
+	data        featuremodels.FeatureCollection
 	srsid       string
 	contenttype string
 }
@@ -44,14 +45,14 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 			continue
 		}
 
-		fcGeoJSON, err := gp.GeoPackage.GetFeatures(r.Context(), gp.GeoPackage.DB, cn, collectionId, offsetParam, limitParam, nil, bboxParam)
+		fcGeoJSON, err := gp.GeoPackage.GetFeatures(r.Context(), gp.GeoPackage.DB, cn, featuremodels.NewFeaturesParams(), collectionId, offsetParam, limitParam, nil, bboxParam)
 
 		if err != nil {
 			return nil, err
 		}
 
 		for _, feature := range fcGeoJSON.Features {
-			hrefBase := fmt.Sprintf("%s%s/%v", gp.Config.Service.Url, path, feature.ID) // /collections
+			hrefBase := fmt.Sprintf("%s%s/%v", gp.Config.Service.Url, path, feature.Feature.(core.Feature).ID) // /collections
 			links, _ := core.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 		}

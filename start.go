@@ -7,6 +7,14 @@ import (
 	"oaf-server/codegen"
 	"oaf-server/core"
 	"oaf-server/geopackage"
+	"github.com/purple-polar-bear/go-ogc-api/core"
+	"github.com/purple-polar-bear/go-ogc-api/core/models"
+	"github.com/purple-polar-bear/go-ogc-api/core/services"
+	"github.com/purple-polar-bear/go-ogc-api/features"
+
+	// ogcapi "oaf-server/package"
+	// ogcapifeatures "oaf-server/package/features"
+
 	"oaf-server/postgis"
 	"oaf-server/server"
 	"os"
@@ -84,6 +92,9 @@ func main() {
 		// extra routing for healthcheck
 		addHealthHandler(router)
 
+		// extra routing for package calls
+		addPackageHandler(router, config)
+
 		fs := http.FileServer(http.Dir("swagger-ui"))
 		router.Handler(regexp.MustCompile("/swagger-ui"), http.StripPrefix("/swagger-ui/", fs))
 
@@ -94,7 +105,15 @@ func main() {
 		port := c.String("port")
 
 		bindAddress := "0.0.0.0:8080"
-		if host != "" && port != "" {
+		if host != "" || port != "" {
+			if host == "" {
+				host = "0.0.0.0"
+			}
+
+			if port == "" {
+				port = "8080"
+			}
+
 			bindAddress = fmt.Sprintf("%v:%v", host, port)
 		}
 
@@ -130,4 +149,43 @@ func addHealthHandler(router *server.RegexpHandler) {
 			log.Printf("Could not write ok")
 		}
 	})
+}
+
+//
+// End of featureservice
+//
+
+func addPackageHandler(router *server.RegexpHandler, dsrc *core.Config) {
+	mountingPath := "/package"
+
+	// engine := ogcapi.NewSimpleEngine(mountingPath)
+	// ogcapifeatures.EnableFeatures(engine, featuredatasource)
+
+	engine := apicore.NewSimpleEngine(mountingPath)
+	apicore.AddBaseJSONTemplates(engine)
+	apicore.AddBaseHTMLTemplates(engine)
+
+	config := engine.Config()
+	config.SetTitle("goaf Demo instance - running latest GitHub version")
+	config.SetDescription("goaf provides an API to geospatial data")
+	config.SetProtocol("http")
+	config.SetHost("172.17.0.1")
+	config.SetPort(8080)
+
+	apiService := engine.GetService("core").(coreservices.CoreService)
+	apiService.SetContact(&coreservices.ContactInfo{Name: "PDOK", Url: "https://pdok.nl/contact"})
+	apiService.SetLicense(&coreservices.LicenseInfo{Name: "CC-BY 4.0 license", Url: "https://creativecommons.org/licenses/by/4.0/"})
+	ctUrlEncoder := coremodels.NewContentTypeUrlEncoding("f")
+	ctUrlEncoder.AddContentType("json", "application/vnd.oai.openapi+json;version=3.0")
+	ctUrlEncoder.AddContentType("json", "application/json")
+	ctUrlEncoder.AddContentType("html", "text/html")
+	apiService.SetContentTypeUrlEncoder(ctUrlEncoder)
+
+	featuredatasource := geopackage.Init(*dsrc)
+	apifeatures.EnableFeatures(engine, featuredatasource)
+	apifeatures.AddFeaturesJSONTemplates(engine)
+	apifeatures.AddFeaturesHTMLTemplates(engine)
+
+	engine.RebuildOpenAPI()
+	router.HandleFunc(regexp.MustCompile("^"+mountingPath), engine.HTTPHandler)
 }
